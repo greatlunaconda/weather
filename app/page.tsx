@@ -1,8 +1,16 @@
+'use client'
+
 import Image from "next/image";
+import { fetchWeather } from '@/app/lib/data';
+import { useEffect } from "react";
+
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+  useEffect(() => {        
+console.log(fetchWeather(190, 190, '/api/mock-test'));
+  }, [])
+  return ( <p> This ia a test</p>
+   /* <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"
@@ -98,6 +106,6 @@ export default function Home() {
           Go to nextjs.org →
         </a>
       </footer>
-    </div>
+    </div>  */
   );
 }
