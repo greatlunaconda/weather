@@ -4,9 +4,20 @@ type WeatherJson = Object;
 
 export  async function  fetchWeather(lat: number, lon: number, url ='') {
   if (url == ''){
-   url = "https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=dac6092827afc4e5557966b0e6b61c3f";
+   url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=dac6092827afc4e5557966b0e6b61c3f`;
   } 
   const res = await fetch(url)
+  
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+  
+  const contentType = res.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await res.text();
+    throw new Error(`Expected JSON but received: ${contentType}. Response: ${text.substring(0, 200)}`);
+  }
+  
   const weatherjson = await res.json();
   const daymap =  getDayMap(weatherjson);
   const daily = getDaily(daymap);
