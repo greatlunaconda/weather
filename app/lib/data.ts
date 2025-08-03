@@ -105,7 +105,7 @@ function getDetail(dayMap: DayArray){
       detobj['weather1'] = ent.weather.filter(elem => elem.icon != '50d');
       detobj['weather2'] = ent.weather.filter(elem => elem.icon == '50d');
     
-      detobj['temp'] = Math.round(Number(ent.main.temp)); 
+      detobj['temp'] = Math.round(Number(ent.main.temp - 273.15)); 
       detobj['pop'] = ent.pop;
       if(ent.rain){
        detobj['ml'] = ent.rain['3h']/3;

@@ -26,7 +26,7 @@ describe('fetchWeather', () => {
     });
     expect(result.daily.size).toBe(6);
 
-   /* expect(result.detail.get('2025-5-13').at(2)).toEqual({
+    expect(result.detail.get('2025-05-13').at(2)).toEqual({
     "time": "21",
     "weather1": [
         {
@@ -37,15 +37,16 @@ describe('fetchWeather', () => {
         }
     ],
     "weather2": [],
-    "temp": 293,
+    "temp": 20,
     "pop": 0,
     "humidity": 60,
     "ws": 3.87,
     "wd": 181
-});*/
-    expect((result.detail).get('2025-5-13').length).toBe(3);
-    expect((result.detail).get('2025-5-18').length).toBe(5);
-    expect((result.detail).get('2025-5-17').length).toBe(8);
+});
+    expect((result.detail).get('2025-05-13').length).toBe(3);
+    expect((result.detail).get('2025-05-18').length).toBe(5);
+    expect((result.detail).get('2025-05-17').length).toBe(8);
+    
     });
 });
 
