@@ -33,9 +33,9 @@ function getDayMap(weatherjson: WeatherJson){
   // UNIX timestamp を JST に変換
     let date = new Date(entry.dt * 1000);
       
-    date.setHours(date.getHours() + 9); // JST (UTC+9)
-    let dateStr = date.toISOString().split('T')[0]; // yyyy-mm-dd 形式
-    let dateStrHour = (date.toISOString().split('T')[1]).split(':')[0];
+  //  date.setHours(date.getHours() + 9); //C+9)
+    let dateStr =  `${date.getMonth() + 1}/${ date.getDate() } ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] [date.getDay()] }`;
+    let dateStrHour = date.getHours(); 
     entry.time = dateStrHour;
     if (!dayMap.has(dateStr))  {
       dayMap.set(dateStr, []);
@@ -56,18 +56,18 @@ function getDaily(dayMap: DayMap)  {
 
       case 1:  dailyobj['weather'] = weathers[0]; break;
       case 2:  dailyobj['weather'] = weathers[1]; break;
-      case 3:  if (weathers[0] == weathers[2]){dailyobj['weather'] = weathers[0];}
+      case 3:  if (weathers[0] == weathers[2]){dailyobj['weather'] = [weathers[0]];}
               else { dailyobj['weather'] = [weathers[0],weathers[2]]; }
               break;
-      case 4:  if (weathers[1] == weathers[3]){ dailyobj['weather'] = weathers[0];}
+      case 4:  if (weathers[1] == weathers[3]){ dailyobj['weather'] = [weathers[0]];}
                else {dailyobj['weather'] = [weathers[1],weathers[3] ];}
                break;
-      case 5:  if (weathers[1] == weathers[4]){ dailyobj['weather'] = weathers[0];}
+      case 5:  if (weathers[1] == weathers[4]){ dailyobj['weather'] = [weathers[0]];}
                else {dailyobj['weather'] =  [weathers[1],weathers[4]]; }
                break;
-      case 6: if (weathers[2] == weathers[5]){ dailyobj['weather'] = weathers[0];}
+      case 6: if (weathers[2] == weathers[5]){ dailyobj['weather'] = [weathers[0]];}
                 else { dailyobj['weather'] = [weathers[2],weathers[5]]; }
-      case 7: if (weathers[3] == weathers[6]) {dailyobj['weather'] = weathers[0];}
+      case 7: if (weathers[3] == weathers[6]) {dailyobj['weather'] = [weathers[0]];}
                 else {dailyobj['weather'] = [weathers[3],weathers[6]]; }
                 break;
         default: console.log("something wrong");        

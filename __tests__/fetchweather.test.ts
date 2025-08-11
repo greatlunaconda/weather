@@ -14,20 +14,19 @@ global.fetch = jest.fn(() =>
 describe('fetchWeather', () => {
     test('It should return key of  dayly and  detail object', async () => {
     const result = await  fetchWeather(190, 190, '/api/mock-test');
-    expect((result.daily).get('2025-05-13')).toEqual({
-        "weather": [
-            "03d",
-            "04n"
-        ],
-        "min": 20,
-        "max": 25,
-        "pop": 0,
-        "ml": " "
-    });
+    expect((result.daily).get('8/10 Sun')).toEqual({
+    "weather": [
+        "10d",
+        "04n"
+    ],
+    "temp": 26,
+    "pop": 0.2,
+    "ml": 0.14
+});
     expect(result.daily.size).toBe(6);
 
-    expect(result.detail.get('2025-05-13').at(2)).toEqual({
-    "time": "21",
+    expect(result.detail.get('8/10 Sun').at(2)).toEqual( {
+    "time": 21,
     "weather1": [
         {
             "id": 804,
@@ -37,16 +36,15 @@ describe('fetchWeather', () => {
         }
     ],
     "weather2": [],
-    "temp": 20,
+    "temp": 26,
     "pop": 0,
-    "humidity": 60,
-    "ws": 3.87,
-    "wd": 181
-});
-    expect((result.detail).get('2025-05-13').length).toBe(3);
-    expect((result.detail).get('2025-05-18').length).toBe(5);
-    expect((result.detail).get('2025-05-17').length).toBe(8);
+    "humidity": 84,
+    "ws": 0.53,
+    "wd": 5
+} );
+    expect((result.detail).get('8/10 Sun').length).toBe(3);
+    expect((result.detail).get('8/14 Thu').length).toBe(8);
+    expect((result.detail).get('8/15 Fri').length).toBe(5);
     
     });
 });
-
