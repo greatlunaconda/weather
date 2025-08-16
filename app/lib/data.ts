@@ -47,29 +47,41 @@ function getDayMap(weatherjson: WeatherJson){
 function getDaily(dayMap: DayMap)  {
   var dailyMap  = new  Map();  
   dayMap.forEach((ent, date) => {
-    let  dailyobj = {};    
-    let weathers = ent.map( entry => entry.weather.filter(elem => elem.icon != '50d')[0]['icon']  );
-    switch(weathers.length){
-      case 8: if (weathers[0] == weathers[2]){dailyobj['weather'] =  [weathers[6]];}
-               else {dailyobj['weather'] = [weathers[2],weathers[6]]; }
+    let  dailyobj = {};
+    let wids = [];
+    wids.push(ent.map(ent1 =>  ent1.weather.map(ent2 => ent2.id ) ) );
+    
+    }
+    switch(ent.length){
+      case 8: 
+        
+        rids = wids[3].concate(wids[6]);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        dailyobj['weather'] = rids; 
+        
       break;
 
-      case 1:  dailyobj['weather'] = weathers[0]; break;
-      case 2:  dailyobj['weather'] = weathers[1]; break;
-      case 3:  if (weathers[0] == weathers[2]){dailyobj['weather'] = [weathers[0]];}
-              else { dailyobj['weather'] = [weathers[0],weathers[2]]; }
+      case 1:  dailyobj['weather'] = wids[0]; break;
+      case 2:  dailyobj['weather'] = wids[1]; break;
+      case 3:  rids = wids[0].concate(wids[2]);
+               rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+               dailyobj['weather'] = rids; 
+               break;
+      case 4:  rids = wids[1].concate(wids[3]);
+               rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+               dailyobj['weather'] = rids;
+      case 5:  rids = wids[1].concate(wids[4]);
+               rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+               dailyobj['weather'] = rids;    
+               break;
+      case 6: rids = wids[2].concate(wids[5);
+              rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+              dailyobj['weather'] = rids;
+              break; 
+      case 7: rids = wids[2].concate(wids[6]);
+              rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+              dailyobj['weather'] = rids; 
               break;
-      case 4:  if (weathers[1] == weathers[3]){ dailyobj['weather'] = [weathers[0]];}
-               else {dailyobj['weather'] = [weathers[1],weathers[3] ];}
-               break;
-      case 5:  if (weathers[1] == weathers[4]){ dailyobj['weather'] = [weathers[0]];}
-               else {dailyobj['weather'] =  [weathers[1],weathers[4]]; }
-               break;
-      case 6: if (weathers[2] == weathers[5]){ dailyobj['weather'] = [weathers[0]];}
-                else { dailyobj['weather'] = [weathers[2],weathers[5]]; }
-      case 7: if (weathers[3] == weathers[6]) {dailyobj['weather'] = [weathers[0]];}
-                else {dailyobj['weather'] = [weathers[3],weathers[6]]; }
-                break;
         default: console.log("something wrong");        
         }
              
@@ -102,8 +114,8 @@ function getDetail(dayMap: DayArray){
       const detobj = {};  
       detobj['time'] = ent.time;
      
-      detobj['weather1'] = ent.weather.filter(elem => elem.icon != '50d');
-      detobj['weather2'] = ent.weather.filter(elem => elem.icon == '50d');
+      detobj['weather1'] = ent.weather.filter(elem => elem.icon != ('50d'||'50n'));
+      detobj['weather2'] = ent.weather.filter(elem => elem.icon == ('50d'||'50n'));
     
       detobj['temp'] = Math.round(Number(ent.main.temp - 273.15)); 
       detobj['pop'] = ent.pop;
