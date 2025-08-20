@@ -1,9 +1,9 @@
 import { cookie } from 'next/headers';
 import { fetchWeather } from '../lib/data';
 
- export default async function Rows() {
- // const cookieStore = await cookies();
-  var  points = null;
+export default async function Rows() {
+  // const cookieStore = await cookies();
+  var points = null;
   //const points = cookieStore.get('points');
   if (points == null) {
     points = [{
@@ -13,10 +13,12 @@ import { fetchWeather } from '../lib/data';
     }];
   }
   return (
-    { points?.map((point)=>
-  <Table name={point.name} lat={point.lat} lon={point.lon}, url > 
-     ) }
-    )
+    <div>
+      {points?.map((point) =>
+        <Table key={point.name} name={point.name} lat={point.lat} lon={point.lon} url={point.url} />
+      )}
+    </div>
+  );
 }
 
     interface WeatherData {
@@ -30,29 +32,29 @@ import { fetchWeather } from '../lib/data';
     data: WeatherData[];
 }
 
-    async function  Table( name, lat, lon,  url='' )  {
+async function Table({ name, lat, lon, url = '' }: { name: string; lat: number; lon: number; url?: string }) {
     const  weather = await fetchWeather(lat, lon, url);
     const daily = weather.daily;
     const detail = weather.detail;
-    const dates = detail.keys();
-    const dateitems = dates.map(day => <th key={date} className="border px-4 py-2">
+    const dates = Object.keys(detail);
+    const dateitems = dates.map(date => <th key={date} className="border px-4 py-2">
                   {date}
               </th>);
     const dailyarr = daily.map((item, date) => [
                  <th key={date} className="border px-4 py-2">
                   {date}
                 </th>,       
-                <td key={date} className="border px-4 py-2">
-                  { item.weather...}
+                <td key={`weather-${date}`} className="border px-4 py-2">
+                  {item.weather}
                 </td>,
-                 <td key={date} className="border px-4 py-2">
+                 <td key={`temp-${date}`} className="border px-4 py-2">
                   { item.max ? 
-                  ( <span class="blue">{item.min}</span><span class="red">{item.max}</span> ) 
-                  : (<span class="green">{item.min}</span> )
+                  ( <span className="blue">{item.min}</span><span className="red">{item.max}</span> ) 
+                  : (<span className="green">{item.min}</span> )
                   }
                  </td>,
-                <td key={date} className="border px-4 py-2">
-                  { item.pop ? (item.pop  item ml)  : (pop) }
+                <td key={`pop-${date}`} className="border px-4 py-2">
+                  { item.pop ? `${item.pop} ml` : 'No precipitation' }
                 </td> ];
    
                  
