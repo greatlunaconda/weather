@@ -48,14 +48,17 @@ function getDaily(dayMap: DayMap)  {
   var dailyMap  = new  Map();  
   dayMap.forEach((ent, date) => {
     let  dailyobj = {};
-    let wids = [];
-    wids.push(ent.map(ent1 =>  ent1.weather.map(ent2 => ent2.id ) ) );
+    var wids = [];
+    ent.forEach(ent1 => {
+      var wid = (ent1.weather).map(ent2 => ent2.id);
+      wids.push(wid);
+  })
+
     
-    }
     switch(ent.length){
       case 8: 
         
-        rids = wids[3].concate(wids[6]);
+        rids = (wids[3]).concat(wids[6]);
         rids = rids.filter((x, i) => rids.indexOf(x) == i); 
         dailyobj['weather'] = rids; 
         
@@ -63,26 +66,32 @@ function getDaily(dayMap: DayMap)  {
 
       case 1:  dailyobj['weather'] = wids[0]; break;
       case 2:  dailyobj['weather'] = wids[1]; break;
-      case 3:  rids = wids[0].concate(wids[2]);
-               rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-               dailyobj['weather'] = rids; 
-               break;
-      case 4:  rids = wids[1].concate(wids[3]);
-               rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-               dailyobj['weather'] = rids;
-      case 5:  rids = wids[1].concate(wids[4]);
-               rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-               dailyobj['weather'] = rids;    
-               break;
-      case 6: rids = wids[2].concate(wids[5);
-              rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-              dailyobj['weather'] = rids;
-              break; 
-      case 7: rids = wids[2].concate(wids[6]);
-              rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-              dailyobj['weather'] = rids; 
-              break;
-        default: console.log("something wrong");        
+      case 3: 
+        var rids = (wids[0]).concat(wids[2]);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        dailyobj['weather'] = rids; 
+      break;
+      case 4:  
+        var rids = (wids[1]).concat(wids[3]);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        dailyobj['weather'] = rids;
+      break;
+      case 5:  
+        var rids = (wids[1]).concat(wids[4]);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        dailyobj['weather'] = rids;    
+      break;
+      case 6: 
+        var rids = (wids[2]).concat(wids[5]);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        dailyobj['weather'] = rids;
+      break; 
+      case 7: 
+        var rids = (wids[2]).concat(wids[6]);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        dailyobj['weather'] = rids; 
+      break;
+      default: console.log("something wrong");        
         }
              
       let temps = dayMap.get(date).map( entry => Math.round(Number(entry.main.temp) - 273.15) );
@@ -114,8 +123,7 @@ function getDetail(dayMap: DayArray){
       const detobj = {};  
       detobj['time'] = ent.time;
      
-      detobj['weather1'] = ent.weather.filter(elem => elem.icon != ('50d'||'50n'));
-      detobj['weather2'] = ent.weather.filter(elem => elem.icon == ('50d'||'50n'));
+      detobj['weather'] = ent.weather.map(x => x.id);
     
       detobj['temp'] = Math.round(Number(ent.main.temp - 273.15)); 
       detobj['pop'] = ent.pop;
