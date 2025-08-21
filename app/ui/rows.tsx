@@ -1,7 +1,8 @@
-import { cookie } from 'next/headers';
+
+//import { cookie } from 'next/headers';
 import { fetchWeather } from '../lib/data';
 
-export default async function Rows() {
+export default async  function Rows() {
   // const cookieStore = await cookies();
   var points = null;
   //const points = cookieStore.get('points');
@@ -24,7 +25,7 @@ export default async function Rows() {
     interface WeatherData {
       date: string;
     wind: string;
-    pop: string;
+  pop: string;
 }
 
     interface WeatherTableProps {
@@ -45,17 +46,14 @@ async function Table({ name, lat, lon, url = '' }: { name: string; lat: number; 
                   {date}
                 </th>,       
                 <td key={`weather-${date}`} className="border px-4 py-2">
-                  {item.weather}
+                  { item.weather }
                 </td>,
-                 <td key={`temp-${date}`} className="border px-4 py-2">
-                  { item.max ? 
-                  ( <span className="blue">{item.min}</span><span className="red">{item.max}</span> ) 
-                  : (<span className="green">{item.min}</span> )
-                  }
-                 </td>,
+                <td key={`temp-${date}`} className="border px-4 py-2">
+                { item.min?  `${item.min}-${item.max}` : `${item['max']}` }  
+                </td>,
                 <td key={`pop-${date}`} className="border px-4 py-2">
                   { item.pop ? `${item.pop} ml` : 'No precipitation' }
-                </td> ];
+                </td> ]);
    
                  
 

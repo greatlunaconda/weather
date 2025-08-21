@@ -1,19 +1,19 @@
-'use client'
-
 import Image from "next/image";
 import { fetchWeather } from '@/app/lib/data';
-import { useEffect } from "react";
+import { Suspense } from "react";
 import  Rows  from '@/app/ui/rows';
 
 export default function Home() {
-  useEffect(() => {        
+/*  useEffect(() => {        
 console.log(fetchWeather(190, 190, '/api/mock-test'));
-  }, [])
+  }, [])*/
   return (
     <>
      <p> This ia a test</p>
   <div>
-  <Rows />
+  <Suspense>
+    <Rows />
+    </Suspense>
   </div>
   </>
    /* <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
