@@ -1,23 +1,31 @@
 
-//import { cookie } from 'next/headers';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { fetchWeather } from '../lib/data';
 
-export default async  function Rows() {
-  // const cookieStore = await cookies();
-  var points = null;
-  //const points = cookieStore.get('points');
-  if (points == null) {
-    points = [{
+export default function Rows() {
+  const [weatherData, setWeatherData] = useState(null);
+  
+  useEffect(() => {
+    const points = [{
       'name': 'test_place',
       'url': '/api/mock-test',
       'lat': 190, 'lon': 190
     }];
+    
+    fetchWeather(points[0].lat, points[0].lon, points[0].url)
+      .then(data => setWeatherData({ ...points[0], weather: data }))
+      .catch(err => console.error('Failed to fetch weather:', err));
+  }, []);
+  
+  if (!weatherData) {
+    return <div>Loading...</div>;
   }
+  
   return (
     <div>
-      {points?.map((point) =>
-        <Table key={point.name} name={point.name} lat={point.lat} lon={point.lon} url={point.url} />
-      )}
+      <Table name={weatherData.name} weather={weatherData.weather} />
     </div>
   );
 }
@@ -33,27 +41,26 @@ export default async  function Rows() {
     data: WeatherData[];
 }
 
-async function Table({ name, lat, lon, url = '' }: { name: string; lat: number; lon: number; url?: string }) {
-    const  weather = await fetchWeather(lat, lon, url);
+function Table({ name, weather }: { name: string; weather: any }) {
     const daily = weather.daily;
     const detail = weather.detail;
     const dates = Object.keys(detail);
-    const dateitems = dates.map(date => <th key={date} className="border px-4 py-2">
-                  {date}
-              </th>);
-    const dailyarr = daily.map((item, date) => [
-                 <th key={date} className="border px-4 py-2">
-                  {date}
-                </th>,       
-                <td key={`weather-${date}`} className="border px-4 py-2">
-                  { item.weather }
-                </td>,
-                <td key={`temp-${date}`} className="border px-4 py-2">
-                { item.min?  `${item.min}-${item.max}` : `${item['max']}` }  
-                </td>,
-                <td key={`pop-${date}`} className="border px-4 py-2">
-                  { item.pop ? `${item.pop} ml` : 'No precipitation' }
-                </td> ]);
+    var dailyarray = [];
+    daily.forEach((item, date) => {
+      dailyarray.push(
+      [  <th key={date} className="border px-4 py-2">
+            {date}
+         </th>,       
+         <td key={`weather-${date}`} className="border px-4 py-2">
+         { item.weather }
+        </td>,
+         <td key={`temp-${date}`} className="border px-4 py-2">
+          { item.min?  `${item.min}-${item.max}` : `${item['max']}` }  
+        </td>,
+        <td key={`pop-${date}`} className="border px-4 py-2">
+            { item.pop ? `${item.pop} ml` : 'No precipitation' }
+        </td>  ] ) 
+        } );
    
                  
 
