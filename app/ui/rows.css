@@ -1,0 +1,19 @@
+@layer components {
+  .one {
+    @apply flex flex-row items-center justify-center space-x-1;
+  }
+
+  .two {
+    @apply flex flex-col items-center justify-center space-y-1;
+  }
+
+  .up {
+    @apply w-6 h-6;
+    display: inline-block !important;
+  }
+
+  .down {
+    @apply w-6 h-6;
+    display: inline-block !important;
+  }
+}

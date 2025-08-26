@@ -48,48 +48,58 @@ function getDaily(dayMap: DayMap)  {
   var dailyMap  = new  Map();  
   dayMap.forEach((ent, date) => {
     let  dailyobj = {};
-    var wids = [];
-    ent.forEach(ent1 => {
-      var wid = (ent1.weather).map(ent2 => ent2.id);
-      wids.push(wid);
-  })
+    const weathers = ent.map(ent1 => ent1.weather);
 
     
     switch(ent.length){
       case 8: 
         
-        rids = (wids[3]).concat(wids[6]);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        var rweather = weathers[3].concat(weathers[6]);
+        var rids = rweather.map(ent => ent.id);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i);
         dailyobj['weather'] = rids; 
         
       break;
 
-      case 1:  dailyobj['weather'] = wids[0]; break;
-      case 2:  dailyobj['weather'] = wids[1]; break;
+      case 1:
+        dailyobj['weather'] = weathers[0].map( x => x.id) ;
+      break;
+      case 2:  
+        dailyobj['weather'] = weathers[1].map( x => x.id); 
+      break;
       case 3: 
-        var rids = (wids[0]).concat(wids[2]);
+        var rweather = weathers[0].concat(weathers[2]);
+        var rids = rweather.map(x => x.id);
         rids = rids.filter((x, i) => rids.indexOf(x) == i); 
         dailyobj['weather'] = rids; 
       break;
-      case 4:  
-        var rids = (wids[1]).concat(wids[3]);
+      case 4:
+        var rweather = weathers[1].concat(weathers[3]);
+        var rids = rweather.map(x => x.id)
         rids = rids.filter((x, i) => rids.indexOf(x) == i); 
         dailyobj['weather'] = rids;
       break;
       case 5:  
-        var rids = (wids[1]).concat(wids[4]);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-        dailyobj['weather'] = rids;    
+        var rweather = weathers[1].concat(weathers[4]);
+        var rids = rweather.map(x => x.id);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i) 
+        dailyobj['weather'] = rids;  
       break;
       case 6: 
-        var rids = (wids[2]).concat(wids[5]);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-        dailyobj['weather'] = rids;
+       var rweather = weathers[2].concat(weathers[5]);
+       var rids = rweather.map(x => x.id);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i) 
+        dailyobj['weather'] = rids;  
+
+       // var rids = (wids[2]).concat(wids[5]);
       break; 
-      case 7: 
-        var rids = (wids[2]).concat(wids[6]);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
-        dailyobj['weather'] = rids; 
+      case 7:
+        var rweather = weathers[2].concat(weathers[6]);
+        var rids = rweather.map(x => x.id);
+        rids = rids.filter((x, i) => rids.indexOf(x) == i) 
+        dailyobj['weather'] = rids;  
+ 
+       // var rids = (wids[2]).concat(wids[6]); 
       break;
       default: console.log("something wrong");        
         }
