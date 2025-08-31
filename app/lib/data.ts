@@ -133,12 +133,12 @@ function getDetail(dayMap: DayArray){
       const detobj = {};  
       detobj['time'] = ent.time;
      
-      detobj['weather'] = ent.weather.map(x => x.id);
+      detobj['weather'] = ent.weather.map(x => [x.id, x.icon]);
     
       detobj['temp'] = Math.round(Number(ent.main.temp - 273.15)); 
-      detobj['pop'] = ent.pop;
+      detobj['pop'] = ent.pop*100;
       if(ent.rain){
-       detobj['ml'] = ent.rain['3h']/3;
+       detobj['ml'] = (ent.rain['3h']/3*1000).toPrecision(2);
       }
       detobj['humidity'] = ent.main.humidity;
       detobj['ws'] = ent.wind.speed;
@@ -149,46 +149,3 @@ function getDetail(dayMap: DayArray){
   return detailMap;
 }  
     
-
-    //object.keys(dailyTemps).sort().forEach(date => {
-    //  const temps = dailyTemps[date];
-    //  const min = Math.min(...temps);
-    //  const max = Math.max(...temps);
-      
-    //  console.log(`${date} → 最低気温: ${min.toFixed(1)}℃, 最高気温: ${max.toFixed(1)}℃`);
-
-
-          
-
-/*
-function getDaily (day){
-  switch(day.length) {
-    case 1:
-      dayObj = {"date" :day[0]["date"],  "weather": day[0]["weather"][0]["id"],  "temp": day[0]["main"]["temp"], "pop" :day[0]["pop"]};
-      dayObj["ml"] = day[0]['rain']["rain"]["3h"];
-
-    break;
-    case 2: 
-      dayObj = {"date" :day[1]["date"]}; 
-      dayObj["weather"] = [day[0]["weather"][0]["id"], day[1]["weather"][0]["id"]];
-      dayObj["temp"] =   [day[0]["main"]["temp"], day[1]["main"]["temp"]];
-      dayObj["pop"] =[ day[0]['pop'], day[1]['pop']]; 
-      dayObj["ml"] = [[day[0]['rain']["3h"], day[1]['rain']['3h']]; 
-  
-    break;
-    case 3:
-      dayObj = {"date" : day[0]["date"] };
-      dayObj["weather"] = [day[0]["weather"][0]["id"], day[1]["weather"][0]["id"]];
-      dayObj["temp"] =   [day[0]["main"]["temp"], day[1]["main"]["temp"]];
-      dayObj["pop"] =[ day[0]['pop'], day[1]['pop']]; 
-      dayObj["ml"] = [[day[0]['rain']["3h"], day[1]['rain']['3h']]; 
-  
-
-
-
-
-  }
-    
-   } 
-   }
-*/

@@ -114,32 +114,127 @@ const Icons = {
 "50d" : "/images/50d_t.png"  
 }      
 function Table({ name, weather }: { name: string; weather: any }) {
+    const [showDate, setShowDate] = useState("");
     const daily = weather.daily;
     const detail = weather.detail;
     const dates = Object.keys(detail);
     var dailyarr = [];
+     const showDetail = (date) => {
+   setShowDate(date);
+ };
+      
+     const hideDetail = () => {
+       setShowDate("");
+ } ;
+ 
+
     daily.forEach((item, date) => { 
       var icons = item.weather.map(x =>  (WeatherArray.find(y  => y[0] == x)[3]));
       icons = icons.filter((x, i) => icons.findIndex(y => x == y) == i);
-      var imgs = icons.map(x => x == '50d'? (<img className='down' src={Icons[x]}/>):((<img className='up' src={Icons[x]}/>)) ) 
+      var imgs = icons.map((x, i)  => x == '50d'? (<img  key={`img-${i}`} className='down' src={Icons[x]}/>):((<img key={`img-${i}`} className='up' src={Icons[x]}/>)) ); 
+     
+                  
       dailyarr.push(
-      [  <th key={date} className="border px-4 py-2">
+      [  <th key={date} className="border px-4 py-2 {date}" onClick={() => showDetail(date)}>
             {date}
          </th>,       
-         <td key={`weather-${date}`} className="border px-4 py-2">
+         <td key={`weather-${date}`} className="border px-4 py-2 {date}">
         <div className={icons.find(x => x == '50d')? "two" :"one"}>
           {imgs}
         </div>      
         </td>,
-         <td key={`temp-${date}`} className="border px-4 py-2"> 
+         <td key={`temp-${date}`} className="border px-4 py-2 {date}"> 
           { item.min?  `${item.min}-${item.max}` : `${item.temp}` }  
         </td>,
-        <td key={`pop-${date}`} className="border px-4 py-2">
+        <td key={`pop-${date}`} className="border px-4 py-2 {date}">
             { item.pop ? `${item.pop} ml` : 'No precipitation' }
         </td>  ] ) 
         } );
-   
-                 
+ 
+ const  DetailTable =  ( prop: {date :string} )  =>{
+    const detarr = detail.get(prop.date);
+    //console.log(date); 
+    //console.log(detail.keys().next().value);
+   // console.log(date == detail.keys().next().value);
+    var jsxs = [];
+  
+    detarr.forEach(item => {
+      var ws = [];
+      item.weather.forEach( w => 
+       w[1] == '50d'? ws.push(w) : ws.unshift(w)
+      );
+
+      jsxs.push(
+      [  <th key={item.time} className="border px-4 py-2">
+            {item.time}
+         </th>,       
+         <td key={`weather-${item.time}`} className="border px-4 py-2">
+        {  ws.map((w, i) => (<img key={`img-${i}`}  className = "icon" src = { Icons[w[1]] } />) ) }            
+        </td>,
+         <td key={`temp-${item.time}`} className="border px-4 py-2"> 
+          {` ${item.temp} `}  
+        </td>,
+        <td key={`pop-${item.time}`} className="border px-4 py-2">
+            { item.pop ? `${item.pop} %  ${item.ml} ml` : 'No precipitation' }
+        </td> ,
+         <td key={`hum-${item.time}`} className="border px-4 py-2">
+            {`${ item.humidity } %` }
+        </td>,
+        <td key={`wind-${item.time}`} className="border px-4 py-2">
+            {` ${ item.ws }  m/s ${ item.wd } `}
+        </td>  
+      ] ) 
+        }
+      );
+    
+
+     return (
+    <div className="p-6 detail">
+      <div className="overflow-x-auto"><button onClick={hideDetail}>X {prop.date}</button> 
+        <table className="min-w-full border border-gray-300 text-center">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border px-4 py-2 text-left">Days</th>
+              { jsxs.map(arr => arr[0]) }             
+             </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-4 py-2 text-left">Weather</td>
+              {jsxs.map(arr => arr[1])}
+            </tr>
+            <tr>
+              <td className="border px-4 py-2 text-left">Temp</td>
+              { jsxs.map(arr => arr[2]) }       
+            </tr>
+            <tr>
+              <td className="border px-4 py-2 text-left">POP</td>
+              { jsxs.map(arr => arr[3]) }
+              
+            </tr>
+            <tr>
+              <td className="border px-4 py-2 text-left">Humidity</td>
+              { jsxs.map(arr => arr[4]) }
+              
+            </tr>
+             <tr>
+              <td className="border px-4 py-2 text-left">Wind</td>
+              { jsxs.map(arr => arr[5]) }
+              
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+    );
+};
+       
+
+
+       
+
+
 
     return (
     <div className="p-6">
@@ -169,39 +264,87 @@ function Table({ name, weather }: { name: string; weather: any }) {
           </tbody>
         </table>
       </div>
+      
+     {showDate != ""?<DetailTable date={showDate} />: ""}
     </div>
     );
 };
 
-/*
-export async function Row(name, lat, lon) {
- const  weather = await fetchWeathea(lat, lon);    
-  return (<div>
-             <div><span>{name}</span></div>   
-             <div>
-               <div>Date</div>
-               <div>weather</div>  
-               <div>pop</div>
-               <div>temp</div>
-            </div> 
-            
-            <div>
-               <div>{getlocal(wearher.dt, )})</div>
-               <div>weather.icon</div>
-               <div>weather.pop</div>
-               <div>weather.ml</div>
-               <div><span>weather.mintmp</span> 
-                    <span>weather.maxtmp</span>
-               </div>  
-             
-             </div>  
-          </div>)
-}
-            
-default async function Detail() {
-   return(
-     <div>weather.date</div>
-     <div>weather.icon</div>
-     <div>weather
-      
+/*function DetailTable( date ) {
+    const detarr = detail.get(date);
+    var jsxs = [];
+  
+    detarr.forEach(item => {
+      var ws = [];
+      item.weather.forEach( w => 
+       w[1] == '50d'? ws.push(w) : ws.unshift(w)
+      );
+
+      jsxs.push(
+      [  <th key={item.time} className="border px-4 py-2">
+            {item.time}
+         </th>,       
+         <td key={`weather-${item.time}`} className="border px-4 py-2">
+        {  ws.map((w, i) => (<img key={`img-${i}`}  className = "icon" src = { Icons[w[1]] } />) ) }            
+        </td>,
+         <td key={`temp-${item.time}`} className="border px-4 py-2"> 
+          ` ${item.temp} `  
+        </td>,
+        <td key={`pop-${item.time}`} className="border px-4 py-2">
+            { item.pop ? `${item.pop} %  ${item.ml} ml` : 'No precipitation' }
+        </td> ,
+         <td key={`hum-${item.time}`} className="border px-4 py-2">
+            `${ item.humidity } %`
+        </td>,
+        <td key={`wind-${item.time}`} className="border px-4 py-2">
+            ` Speed ${ item.ws }  m/s Direction ${ item.wd } `
+        </td>  
+      ] ) 
+        }
+      );
+    
+
+     return (
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4 text-center">{name}</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 text-center">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border px-4 py-2 text-left">Days</th>
+              { jsxs.map(arr => arr[0]) }             
+             </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-4 py-2 text-left">Weather</td>
+              {jsxs.map(arr => arr[1])}
+            </tr>
+            <tr>
+              <td className="border px-4 py-2 text-left">Temp</td>
+              { jsxs.map(arr => arr[2]) }       
+            </tr>
+            <tr>
+              <td className="border px-4 py-2 text-left">POP</td>
+              { jsxs.map(arr => arr[3]) }
+              
+            </tr>
+            <tr>
+              <td className="border px-4 py-2 text-left">Humidity</td>
+              { jsxs.map(arr => arr[3]) }
+              
+            </tr>
+             <tr>
+              <td className="border px-4 py-2 text-left">Wind</td>
+              { jsxs.map(arr => arr[3]) }
+              
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+    );
+};
+
 */
