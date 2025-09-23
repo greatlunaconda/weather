@@ -6,7 +6,7 @@ export  async function  fetchWeather(lat: number, lon: number, url ='') {
   if (url == ''){
    url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=dac6092827afc4e5557966b0e6b61c3f`;
   } 
-  const res = await fetch(url)
+  const res = await fetch(url).catch(err=> console.log("something wrong", err));
   
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status}`);
@@ -44,7 +44,7 @@ function getDayMap(weatherjson: WeatherJson){
   });
     return dayMap;
 }
-function getDaily(dayMap: DayMap)  {
+function getDaily(dayMap: any)  {
   var dailyMap  = new  Map();  
   dayMap.forEach((ent, date) => {
     let  dailyobj = {};
@@ -125,7 +125,7 @@ function getDaily(dayMap: DayMap)  {
     
 
     
-function getDetail(dayMap: DayArray){
+function getDetail(dayMap: any){
   var detailMap = new Map();
   dayMap.forEach((entry, date) => {
     detailMap.set(date, []); 

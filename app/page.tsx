@@ -4,9 +4,7 @@ import { Suspense } from "react";
 import  Rows  from '@/app/ui/rows';
 
 export default function Home() {
-/*  useEffect(() => {        
-console.log(fetchWeather(190, 190, '/api/mock-test'));
-  }, [])*/
+
   return (
     <>
      <p> This ia a test</p>

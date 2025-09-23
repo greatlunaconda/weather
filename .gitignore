@@ -42,6 +42,8 @@ next-env.d.ts
 
 # gitlog
 *.txt
+# patch
+*.patch 
 
 # public/
 /public/
