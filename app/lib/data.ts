@@ -5,7 +5,10 @@ type WeatherJson = Object;
 export  async function  fetchWeather(lat: number, lon: number, url ='') {
   if (url == ''){
    url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=dac6092827afc4e5557966b0e6b61c3f`;
-  } 
+  } else if (url.startsWith('/api/')) {
+   url = `http://localhost:3000${url}`;
+  }
+  console.log("url = " + url);
   const res = await fetch(url).catch(err=> console.log("something wrong", err));
   
   if (!res.ok) {
