@@ -7,7 +7,9 @@ export default function Home() {
 
   return (
     <>
-     <p> This ia a test</p>
+  <div>
+     <div class="menu"><Menu/></div>
+  </div>
   <div>
   <Suspense>
     <Rows />

@@ -31,11 +31,12 @@ export  async function  fetchWeather(lat: number, lon: number, url ='') {
 
 function getDayMap(weatherjson: WeatherJson){
   var dayMap = new Map();
-  const tz = weatherjson.city.timezone;
+  const tz = weatherjson.city.timezone / 60;
  (weatherjson['list']).forEach(entry => {  
   // UNIX timestamp を JST に変換
     let date = new Date(entry.dt * 1000);
-      
+    const tzo = date.getTimezoneOffset();
+    date.setMinutes(tzo + tz);  
   //  date.setHours(date.getHours() + 9); //C+9)
     let dateStr =  `${date.getMonth() + 1}/${ date.getDate() } ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] [date.getDay()] }`;
     let dateStrHour = date.getHours(); 
