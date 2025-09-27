@@ -1,6 +1,5 @@
 'use client';
 
-import { Linden_Hill } from "next/font/google";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -18,14 +17,15 @@ export default function Menu() {
           onClick={() => handleMenuClick('selectPlace')}
           className="menu-button"
         >
-          Select pl
+          Select Place
         </button>
         {activeMenu === 'selectPlace' && (
           <div className="menu-content">
             <Link href="/leaflet-place-selector">Select Place</Link>
           </div>
         )}
-         <button>
+        
+        <button
           onClick={() => handleMenuClick('language')}
           className="menu-button"
         >

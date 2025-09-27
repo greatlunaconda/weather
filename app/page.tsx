@@ -2,13 +2,17 @@ import Image from "next/image";
 import { fetchWeather } from '@/app/lib/data';
 import { Suspense } from "react";
 import  Rows  from '@/app/ui/rows';
+import Menu from "./ui/menu";
 
 export default function Home() {
 
   return (
     <>
   <div>
-     <div class="menu"><Menu/></div>
+     <div className="menu">
+      <Menu />
+
+      </div>
   </div>
   <div>
   <Suspense>

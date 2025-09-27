@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { savePlaceToCookie, getPlaceFromCookie, PlaceData } from '../lib/cookies';
+
+// Import Leaflet CSS
+import 'leaflet/dist/leaflet.css';
 
 interface LeafletPlaceSelectorProps {
   onPlaceSelect?: (place: PlaceData) => void;
@@ -20,6 +24,14 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
 
       // Dynamically import Leaflet
       const L = (await import('leaflet')).default;
+      
+      // Fix for Leaflet default markers
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      });
       
       // Load saved place from cookie
       const savedPlace = getPlaceFromCookie();
