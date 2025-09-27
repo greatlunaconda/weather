@@ -1,11 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import { savePlaceToCookie, getPlaceFromCookie, PlaceData } from '../lib/cookies';
-
-// Import Leaflet CSS
-import 'leaflet/dist/leaflet.css';
 
 interface LeafletPlaceSelectorProps {
   onPlaceSelect?: (place: PlaceData) => void;
@@ -22,15 +18,24 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
     const loadLeaflet = async () => {
       if (typeof window === 'undefined') return;
 
+      // Load Leaflet CSS
+      if (!document.querySelector('link[href*="leaflet.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+      }
+
       // Dynamically import Leaflet
-      const L = (await import('leaflet')).default;
+      const leaflet = await import('leaflet');
+      const L = leaflet.default || leaflet;
       
       // Fix for Leaflet default markers
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       });
       
       // Load saved place from cookie
