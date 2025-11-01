@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { savePlaceToCookie, getPlaceFromCookie, PlaceData } from '../lib/cookies';
 
-interface LeafletPlaceSelectorProps {
-  onPlaceSelect?: (place: PlaceData) => void;
+export interface LeafletSaveProps {
+  onsave: (placedata: PlaceData ) => void;
 }
 
-export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSelectorProps) {
-  const [placeName, setPlaceName] = useState('');
-  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave: LeafletSaveProps;  currentPlaces : PlaceData[] | []; }) {
+  const [placename, setPlaceName] = useState("");
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -39,18 +39,14 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
       });
       
       // Load saved place from cookie
-      const savedPlace = getPlaceFromCookie();
-      if (savedPlace) {
-        setPlaceName(savedPlace.name);
-        setCoordinates({ lat: savedPlace.lat, lon: savedPlace.lon });
-      }
-
+      const savedPlaceses = currentPlaces;
+     
+            
       if (mapRef.current && !mapInstance.current) {
         // Initialize Leaflet map
-        const map = L.map(mapRef.current).setView(
-          savedPlace ? [savedPlace.lat, savedPlace.lon] : [35.6762, 139.6503], 
-          10
-        );
+        const map = L.map(mapRef.current);
+        navigator.geolocation.getCurrentPosition((pos)=>
+          map.setView([pos.coords.latitude, pos.coords.longitude]), (pos) => map.setView([35.689574, 139.693550]));
 
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -60,17 +56,18 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
         mapInstance.current = map;
 
         // Add marker if saved place exists
-        if (savedPlace) {
-          markerRef.current = L.marker([savedPlace.lat, savedPlace.lon]).addTo(map);
-        }
+         savedPlaceses?.forEach(el => {
+           L.marker([el.lat, el.lng]).addTo(map);
+        });
+         
+
 
         // Handle map clicks
         map.on('click', async (e: any) => {
           const { lat, lng } = e.latlng;
+          setCoordinates({ lat, lng });
           
-          setCoordinates({ lat, lon: lng });
-          
-          // Remove existing marker
+    //      Remove existing marker
           if (markerRef.current) {
             map.removeLayer(markerRef.current);
           }
@@ -85,15 +82,15 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
             );
             const data = await response.json();
             if (data.display_name) {
+              
               setPlaceName(data.display_name);
             }
           } catch (error) {
-            console.error('Geocoding error:', error);
+            console.error('Geocoding');
           }
         });
       }
-    };
-
+    };  
     loadLeaflet();
 
     return () => {
@@ -102,28 +99,14 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
         mapInstance.current = null;
       }
     };
-  }, []);
+   } , [] );
 
-  const handleSave = () => {
-    if (placeName && coordinates) {
-      const place: PlaceData = {
-        name: placeName,
-        lat: coordinates.lat,
-        lon: coordinates.lon,
-      };
-      
-      savePlaceToCookie(place);
-      onPlaceSelect?.(place);
-      alert('Place saved successfully!');
-    }
-  };
-
-  return (
+    return (
     <div className="w-full max-w-2xl mx-auto p-4">
       <div className="mb-4">
         <input
           type="text"
-          value={placeName}
+          value={placename}
           onChange={(e) => setPlaceName(e.target.value)}
           placeholder="Enter place name"
           className="w-full p-2 border border-gray-300 rounded"
@@ -135,17 +118,19 @@ export default function LeafletPlaceSelector({ onPlaceSelect }: LeafletPlaceSele
       {coordinates && (
         <div className="mb-4 text-sm text-gray-600">
           <p>Latitude: {coordinates.lat.toFixed(6)}</p>
-          <p>Longitude: {coordinates.lon.toFixed(6)}</p>
+          <p>Longitude: {coordinates.lng.toFixed(6)}</p>
         </div>
       )}
       
       <button
-        onClick={handleSave}
-        disabled={!placeName || !coordinates}
+        onClick= {() => coordinates && onsave?.( {"name": placename, "lat": coordinates.lat, "lng":coordinates.lng} as PlaceData)
+ } 
+        disabled={!placename || !coordinates}
         className="w-full bg-blue-500 text-white p-2 rounded disabled:bg-gray-300"
-      >
-        Save Place
+        >
+        Add
       </button>
     </div>
+  
   );
 }

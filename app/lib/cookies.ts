@@ -1,25 +1,28 @@
+'use server'
+
+import { cookies } from 'next/headers';
+
 export interface PlaceData {
   name: string;
   lat: number;
-  lon: number;
+  lng: number;
 }
 
-export function savePlaceToCookie(place: PlaceData): void {
-  if (typeof document !== 'undefined') {
-    document.cookie = `place=${JSON.stringify(place)}; path=/; max-age=31536000`;
-  }
+export  async function savePlaceToCookie(places: PlaceData[] | []): Promise<void> {
+  await  cookies().set('place', JSON.stringify(places), {
+    path: '/',
+    maxAge: 31536000
+  });
 }
 
-export function getPlaceFromCookie(): PlaceData | null {
-  if (typeof document !== 'undefined') {
-    const match = document.cookie.match(/place=([^;]+)/);
-    if (match) {
-      try {
-        return JSON.parse(decodeURIComponent(match[1]));
-      } catch {
-        return null;
-      }
+export  async function getPlaceFromCookie(): Promise<PlaceData[] | []> {
+  const placeCookie = await cookies().get('place');
+  if (placeCookie) {
+    try {
+      return JSON.parse(placeCookie.value);
+    } catch {
+      Error("shmething wrong on parsing cookies");
     }
   }
-  return null;
+  return [];
 }
