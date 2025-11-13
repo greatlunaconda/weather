@@ -7,7 +7,7 @@ export interface LeafletSaveProps {
   onsave: (placedata: PlaceData ) => void;
 }
 
-export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave: LeafletSaveProps;  currentPlaces : PlaceData[] | []; }) {
+export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave: (placedata: PlaceData) => void;  currentPlaces : PlaceData[] | []; }) {
   const [placename, setPlaceName] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -45,8 +45,9 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
       if (mapRef.current && !mapInstance.current) {
         // Initialize Leaflet map
         const map = L.map(mapRef.current);
-        navigator.geolocation.getCurrentPosition((pos)=>
-          map.setView([pos.coords.latitude, pos.coords.longitude]), (pos) => map.setView([35.689574, 139.693550]));
+        navigator.geolocation.getCurrentPosition((pos)=> 
+          map.setView([pos.coords.latitude, pos.coords.longitude],10), (pos) => map.setView([35.689574, 139.693550, 10])
+      );
 
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -56,7 +57,7 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
         mapInstance.current = map;
 
         // Add marker if saved place exists
-         savedPlaceses?.forEach(el => {
+         savedPlaceses.forEach?.(el => {
            L.marker([el.lat, el.lng]).addTo(map);
         });
          

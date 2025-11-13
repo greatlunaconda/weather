@@ -7,7 +7,7 @@
   --foreground: #171717;
 }
 
-@import "./ui/rows.css";
+@import "./ui/row.css";
 
 @media (prefers-color-scheme: dark) {
   :root {

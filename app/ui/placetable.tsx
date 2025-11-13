@@ -1,23 +1,25 @@
-'use-client'
+'use client'
 import { useEffect, useState } from "react";
 import { getPlaceFromCookie, PlaceData, savePlaceToCookie } from "../lib/cookies"
 import LeafletPlaceSelector from "./leaflet-place-selector";
 
 
 export default function PlaceTable( ){
-
+  
+  const [current, setCurrent] = useState<PlaceData[] | []> ([]);
   const [places, setPlaces] = useState<PlaceData[] | []>([]);
   const [selector, setSelector] = useState(false);
   const [saved, setSaved] = useState(false);
-
+  
   useEffect( () => {
     (async () =>  {
     if(saved == true) {
     await savePlaceToCookie(places);
     setSaved(false);
     } else {
-      let currentPlaces = await getPlaceFromCookie();
-      setPlaces(currentPlaces);
+      let  current = await getPlaceFromCookie();
+      console.log(current);
+      setCurrent(current);
     }
   })() 
   }  , [saved] )
@@ -42,7 +44,7 @@ export default function PlaceTable( ){
 
 
   const deletePlace = (place: PlaceData) => {
-    const newPlaces:PlaceData[] | null | undefined = places?.filter(p => p.name !== place.name);
+    const newPlaces:PlaceData[] | [] = places?.filter(p => p.name !== place.name);
     newPlaces != undefined && setPlaces(newPlaces);
   };
 
@@ -50,26 +52,33 @@ export default function PlaceTable( ){
 
   
   
-const addPlace = (placedata: PlaceData):void  =>  {     
+const addPlace = (placedata:PlaceData):void  =>  {     
   if (placedata.lat &&  placedata.lng &&  placedata.name) {
   
-      const place: PlaceData = 
-        {
-        name: placedata.name,
-        lat: placedata.lat,
-        lng: placedata.lng
-      };  
-        setPlaces([place, ...places]);
+        setPlaces([placedata, ...places]);
         alert('Place saved successfully!');
     }
   };
 
+const savePlalces = ()  => {
+  setSaved(true);
+}
 
-
+const cancel = () => {
+  setPlaces(current);
+}
   
 
   return (
     <div>
+      <div> 
+        <button onClick ={savePlalces}>
+          Save
+        </button>
+        <button onClick={cancel}>
+          Cancel
+        </button>
+      </div> 
       <div className="leaflet-add">
          <button onClick={() => toggleSelector() }>
            { selector ? <span className="map colse">Add Place</span> : <span className="map open">Close Map</span> }
@@ -92,7 +101,7 @@ const addPlace = (placedata: PlaceData):void  =>  {
         </tr>
       </thead>
       <tbody>
-        {  places?.map(place =>  
+        {  places.map?.(place =>  
         (
           <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -105,6 +114,7 @@ const addPlace = (placedata: PlaceData):void  =>  {
               {place.lng}
             </td>
             <td className="px-6 py-4">
+           
               <div>
                 <button onClick={() => up(place)}>UP</button>
                 <button onClick={() => down(place)}>DOWN</button>
