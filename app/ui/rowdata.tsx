@@ -1,5 +1,5 @@
 import { fetchWeather } from '../lib/data';
-import './row.css';
+import styles from './row.module.css';
 import Row from './row';
 import { getPlaceFromCookie } from '../lib/cookies';
 
