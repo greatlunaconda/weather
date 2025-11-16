@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '../lib/language-context';
 
 interface WeatherData {
   date: string;
@@ -90,6 +91,7 @@ const Icons = {
 }      
 export default function Row({ name, weather }: { name: string; weather: any }) {
     const [showDate, setShowDate] = useState("");
+    const { t } = useLanguage();
     const daily = weather.daily;
     const detail = weather.detail;
     const dates = Object.keys(detail);
@@ -122,7 +124,7 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
           { item.min?  `${item.min}-${item.max}` : `${item.temp}` }  
         </td>,
         <td key={`pop-${date}`} className="border px-4 py-2 {date}">
-            { item.pop ? `${item.pop} ml` : 'No precipitation' }
+            { item.pop ? `${item.pop} ml` : t('noPrecipitation') }
         </td>  ] ) 
         } );
  
@@ -150,7 +152,7 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
           {` ${item.temp} `}  
         </td>,
         <td key={`pop-${item.time}`} className="border px-4 py-2">
-            { item.pop ? `${item.pop} %  ${item.ml} ml` : 'No precipitation' }
+            { item.pop ? `${item.pop} %  ${item.ml} ml` : t('noPrecipitation') }
         </td> ,
          <td key={`hum-${item.time}`} className="border px-4 py-2">
             {`${ item.humidity } %` }
@@ -169,31 +171,31 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
         <table className="min-w-full border border-gray-300 text-center">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-left">Days</th>
+              <th className="border px-4 py-2 text-left">{t('days')}</th>
               { jsxs.map(arr => arr[0]) }             
              </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="border px-4 py-2 text-left">Weather</td>
+              <td className="border px-4 py-2 text-left">{t('weather')}</td>
               {jsxs.map(arr => arr[1])}
             </tr>
             <tr>
-              <td className="border px-4 py-2 text-left">Temp</td>
+              <td className="border px-4 py-2 text-left">{t('temp')}</td>
               { jsxs.map(arr => arr[2]) }       
             </tr>
             <tr>
-              <td className="border px-4 py-2 text-left">POP</td>
+              <td className="border px-4 py-2 text-left">{t('pop')}</td>
               { jsxs.map(arr => arr[3]) }
               
             </tr>
             <tr>
-              <td className="border px-4 py-2 text-left">Humidity</td>
+              <td className="border px-4 py-2 text-left">{t('humidity')}</td>
               { jsxs.map(arr => arr[4]) }
               
             </tr>
              <tr>
-              <td className="border px-4 py-2 text-left">Wind</td>
+              <td className="border px-4 py-2 text-left">{t('wind')}</td>
               { jsxs.map(arr => arr[5]) }
               
             </tr>
@@ -218,21 +220,21 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
         <table className="min-w-full border border-gray-300 text-center">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-left">Days</th>
+              <th className="border px-4 py-2 text-left">{t('days')}</th>
               { dailyarr.map(arr => arr[0]) }             
              </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="border px-4 py-2 text-left">Weather</td>
+              <td className="border px-4 py-2 text-left">{t('weather')}</td>
               {dailyarr.map(arr => arr[1])}
             </tr>
             <tr>
-              <td className="border px-4 py-2 text-left">Temp</td>
+              <td className="border px-4 py-2 text-left">{t('temp')}</td>
               { dailyarr.map(arr => arr[2]) }       
             </tr>
             <tr>
-              <td className="border px-4 py-2 text-left">POP</td>
+              <td className="border px-4 py-2 text-left">{t('pop')}</td>
               { dailyarr.map(arr => arr[3]) }
               
             </tr>
