@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useLanguage } from '../lib/language-context';
-
 interface WeatherData {
   date: string;
  wind: string;
@@ -90,74 +89,123 @@ const Icons = {
 "50n" : "/images/50n_t.png" 
 }      
 export default function Row({ name, weather }: { name: string; weather: any }) {
-    const [showDate, setShowDate] = useState("");
+    const [showDetail, setShowDetail] = useState("");
     const { t } = useLanguage();
     const daily = weather.daily;
     const detail = weather.detail;
     const dates = Object.keys(detail);
     var dailyarr = [];
-     const showDetail = (date) => {
-   setShowDate(date);
+    console.log(detail);
+     const showDetailOn = (date) => {
+   setShowDetail(date);
  };
       
      const hideDetail = () => {
-       setShowDate("");
+       setShowDetail("");
  } ;
  
 
     daily.forEach((item, date) => { 
       var icons = item.weather.map(x =>  (WeatherArray.find(y  => y[0] == x)[3]));
       icons = icons.filter((x, i) => icons.findIndex(y => x == y) == i);
-      var imgs = icons.map((x, i)  => x == '50d'? (<img  key={`img-${i}`} className='down' src={Icons[x]}/>):((<img key={`img-${i}`} className='up' src={Icons[x]}/>)) ); 
+      var imgs = icons.map((x, i)  => x == '50d'? (<img  key={`img-${i}`} className="w-6 h-6 inline-block" src={Icons[x]}/>):((<img key={`img-${i}`} className="w-6 h-6 inline-block" src={Icons[x]}/>)) ); 
      
                   
       dailyarr.push(
-      [  <th key={date} className="border px-4 py-2 {date}" onClick={() => showDetail(date)}>
+      [  <th key={date} className="border px-4 py-2 w-[15%] cursor-pointer" onClick={() => showDetailOn(date)}>
             {date}
          </th>,       
-         <td key={`weather-${date}`} className="border px-4 py-2 {date}">
-        <div className={icons.find(x => x == '50d')? "two" :"one"}>
+         <td key={`weather-${date}`} className="border px-4 py-2 w-[15%]">
+        <div className={icons.find(x => x == '50d')? "flex flex-col items-center justify-center gap-1" :"flex flex-row items-center justify-center gap-1"}>
           {imgs}
         </div>      
         </td>,
-         <td key={`temp-${date}`} className="border px-4 py-2 {date}"> 
+         <td key={`temp-${date}`} className="border px-4 py-2 w-[15%]"> 
           { item.min?  `${item.min}-${item.max}` : `${item.temp}` }  
         </td>,
-        <td key={`pop-${date}`} className="border px-4 py-2 {date}">
+        <td key={`pop-${date}`} className="border px-4 py-2 w-[15%]">
             { item.pop ? `${item.pop} ml` : t('noPrecipitation') }
         </td>  ] ) 
         } );
- 
- const  DetailTable =  ( prop: {date :string} )  =>{
-    const detarr = detail.get(prop.date);
+
+        //Detail compponent is displyed overlay   just below  the date row  of Daily component. 
+        
+
+
+       
+
+
+    return (
+     <div  className={`${showDetail? "anchor-name-[detail] relative": ""}    p-6 `}> 
+      
+      <div className="overflow-x-auto">
+    
+        <table className="min-w-full border border-gray-300 text-center h-[120px]">
+          <thead>
+            <tr className="bg-gray-100 h-[25px]"> 
+              <th className="border px-4 py-2 text-left w-[20%]">{t('days')}</th>
+              { dailyarr.map(arr => arr[0]) }           
+             </tr>
+          </thead>
+          <tbody>
+            <tr className="h-[35px]">  
+              <td className="border px-4 py-2 text-left w-[20%]">{name}</td>
+              {dailyarr.map(arr => arr[1])}
+            </tr>
+            <tr className="h-[30px]"> 
+              <td className="border px-4 py-2 text-left w-[20%]">{t('temp')}</td>
+              { dailyarr.map(arr => arr[2]) }       
+            </tr>
+            <tr className="h-[30px]"> 
+              <td className="border px-4 py-2 text-left w-[20%]">{t('pop')}</td>
+              { dailyarr.map(arr => arr[3]) }
+              
+            </tr>
+          </tbody>
+        </table>
+      </div>
+     {showDetail != ""? <DetailTable  datedetail={detail.get(showDetail)} />  : ""}
+    <div><button onClick={hideDetail}>X </button> </div>
+
+    </div>
+    
+         
+     
+    );
+};
+
+
+const  DetailTable =  ({datedetail}:{datedetail:[]})  =>{
     //console.log(date); 
     //console.log(detail.keys().next().value);
    // console.log(date == detail.keys().next().value);
     var jsxs = [];
-  
-    detarr.forEach(item => {
+    console.log("datedetai = "+ datedetail); 
+     console.log(datedetail); 
+     console.log(datedetail.length)
+    datedetail.forEach(item => {
       var ws = [];
       item.weather.forEach( w => 
        w[1] == '50d'? ws.push(w) : ws.unshift(w)
       );
 
       jsxs.push(
-      [  <th key={item.time} className="border px-4 py-2">
+      [  <th key={item.time} className="border px-4 py-2 w-[10%]">
             {item.time}
          </th>,       
-         <td key={`weather-${item.time}`} className="border px-4 py-2">
+         <td key={`weather-${item.time}`} className="border px-4 py-2 w-[10%]">
         {  ws.map((w, i) => (<img key={`img-${i}`}  className = "icon" src = { Icons[w[1]] } />) ) }            
         </td>,
-         <td key={`temp-${item.time}`} className="border px-4 py-2"> 
+         <td key={`temp-${item.time}`} className="border px-4 py-2 w-[10%]"> 
           {` ${item.temp} `}  
         </td>,
-        <td key={`pop-${item.time}`} className="border px-4 py-2">
-            { item.pop ? `${item.pop} %  ${item.ml} ml` : t('noPrecipitation') }
+        <td key={`pop-${item.time}`} className="border px-4 py-2 w-[10%]">
+            { item.pop ? `${item.pop} %  ${item.ml} ml` : ('noPrecipitation') }
         </td> ,
-         <td key={`hum-${item.time}`} className="border px-4 py-2">
+         <td key={`hum-${item.time}`} className="border px-4 py-2 w-[10%]">
             {`${ item.humidity } %` }
         </td>,
-        <td key={`wind-${item.time}`} className="border px-4 py-2">
+        <td key={`wind-${item.time}`} className="border px-4 py-2 w-[10%]">
             {` ${ item.ws }  m/s ${ item.wd } `}
         </td>  
       ] ) 
@@ -166,36 +214,36 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
     
 
      return (
-    <div className="p-6 detail">
-      <div className="overflow-x-auto"><button onClick={hideDetail}>X {prop.date}</button> 
-        <table className="min-w-full border border-gray-300 text-center">
+    <div className="anchor-[detail]  top-[50px] right-[20px]   absolute z-100 p-6  w-full bg-white shadow-lg ">
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 text-center h-[120px]">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-left">{t('days')}</th>
+            <tr className="bg-gray-100 h-[25px]">
+              <th className="border px-4 py-2 text-left w-[20%]">{('days')}</th>
               { jsxs.map(arr => arr[0]) }             
              </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('weather')}</td>
+            <tr className="h-[35px]">
+              <td className="border px-4 py-2 text-left w-[20%]">{('weather')}</td>
               {jsxs.map(arr => arr[1])}
             </tr>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('temp')}</td>
+            <tr className="h-[30px]">
+              <td className="border px-4 py-2 text-left w-[20%]">{('temp')}</td>
               { jsxs.map(arr => arr[2]) }       
             </tr>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('pop')}</td>
+            <tr className="h-[30px]">
+              <td className="border px-4 py-2 text-left w-[20%]">{('pop')}</td>
               { jsxs.map(arr => arr[3]) }
               
             </tr>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('humidity')}</td>
+            <tr className="h-[30px]">
+              <td className="border px-4 py-2 text-left w-[20%]">{('humidity')}</td>
               { jsxs.map(arr => arr[4]) }
               
             </tr>
-             <tr>
-              <td className="border px-4 py-2 text-left">{t('wind')}</td>
+             <tr className="h-[30px]">
+              <td className="border px-4 py-2 text-left w-[20%]">{('wind')}</td>
               { jsxs.map(arr => arr[5]) }
               
             </tr>
@@ -203,46 +251,6 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
           </tbody>
         </table>
       </div>
-    </div>
-    );
-};
-       
-
-
-       
-
-
-
-    return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center">{name}</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-center">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-left">{t('days')}</th>
-              { dailyarr.map(arr => arr[0]) }             
-             </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('weather')}</td>
-              {dailyarr.map(arr => arr[1])}
-            </tr>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('temp')}</td>
-              { dailyarr.map(arr => arr[2]) }       
-            </tr>
-            <tr>
-              <td className="border px-4 py-2 text-left">{t('pop')}</td>
-              { dailyarr.map(arr => arr[3]) }
-              
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-     {showDate != ""?<DetailTable date={showDate} />: ""}
     </div>
     );
 };

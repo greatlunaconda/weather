@@ -6,6 +6,7 @@ import Menu from "./ui/menu";
 import { getPlaceFromCookie, getShowCurrentPlace, PlaceData } from "./lib/cookies";
 import {Currentrow} from "./ui/currentrow";
 
+
 export default async function Home() {
   const  cookie:  {lat:number, lng:number, name:string}[] = await getPlaceFromCookie();
   const showcurrent = true; //  await getShowCurrentPlace();
@@ -17,12 +18,12 @@ export default async function Home() {
   return (
     <>
   <div>
-     <div className="menu">
+     <div className="menu  absolute right-[5%] top-1">
       <Menu />
 
       </div>
   </div>
-  <div>
+  <div className="mt-[50px] ">
     {showcurrent && <Suspense><Currentrow /></Suspense>}
     { places.map(place => 
   <Suspense>

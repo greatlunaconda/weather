@@ -21,30 +21,54 @@ export default function Menu() {
   ];
 
   return (
-    <div className="menu-container">
-      <button onClick={showMenu}>{t('menu')}</button>
+    <div className="relative">
+      <div>
+      <button 
+        onClick={showMenu}
+        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md font-medium"
+      >
+        {t('menu')}
+      </button>
+      </div>
       {menu && (
-        <div className="menu-items">
-          <div className="menu-content">
-            <Link href="/select-place">{t('selectPlace')}</Link>
+        <>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMenu(false)} />
+          <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 overflow-hidden">
+            <div className="py-2">
+              <Link 
+                href="/select-place"
+                className="block px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700 hover:text-blue-600"
+              >
+                {t('selectPlace')}
+              </Link>
+            </div>
+            <div className="border-t border-gray-100">
+              <button 
+                onClick={() => setShowLang(!showLang)}
+                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700 hover:text-blue-600 flex justify-between items-center"
+              >
+                {t('language')}
+                <span className="text-sm">{showLang ? '▲' : '▼'}</span>
+              </button>
+              {showLang && (
+                <div className="bg-gray-50 border-t border-gray-100">
+                  {languages.map(lang => (
+                    <button 
+                      key={lang.code} 
+                      onClick={() => {setLanguage(lang.code as any); setShowLang(false);}}
+                      className="w-full text-left px-6 py-2 hover:bg-blue-100 transition-colors text-sm text-gray-600 hover:text-blue-700"
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="border-t border-gray-100">
+              <p className="px-4 py-3 text-gray-700">{t('aboutUs')}</p>
+            </div>
           </div>
-          <div className="menu-content">
-            <button onClick={() => setShowLang(!showLang)}>{t('language')}</button>
-            {showLang && (
-              <div className="language-submenu">
-                {languages.map(lang => (
-                  <button key={lang.code} onClick={() => {setLanguage(lang.code as any); setShowLang(false);}}>
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="menu-content">
-            <p>{t('aboutUs')}</p>
-          </div>
-        </div>
+        </>
       )}
     </div>
-  );
-}
+  );}
