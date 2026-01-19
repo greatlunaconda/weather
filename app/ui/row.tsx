@@ -112,9 +112,14 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
      
                   
       dailyarr.push(
-      [  <th key={date} className="border px-4 py-2 w-[15%] cursor-pointer" onClick={() => showDetailOn(date)}>
-            {date}
-         </th>,       
+      [ showDetail == date ? 
+      <th key={date} className="bg-green-200 border px-4 py-2 w-[15%] cursor-pointer" onClick={() => showDetailOn(date)}>
+           <span> {date}</span> <span className='inline-block  relative z-100  ' onClick={() =>hideDetail()}>X </span> 
+ 
+            </th> :
+            <th key={date} className="border px-4 py-2 w-[15%] cursor-pointer" onClick={() => showDetailOn(date)}>
+            {date} 
+            </th> ,       
          <td key={`weather-${date}`} className="border px-4 py-2 w-[15%]">
         <div className={icons.find(x => x == '50d')? "flex flex-col items-center justify-center gap-1" :"flex flex-row items-center justify-center gap-1"}>
           {imgs}
@@ -164,9 +169,14 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
           </tbody>
         </table>
       </div>
-     {showDetail != ""? <DetailTable  datedetail={detail.get(showDetail)} />  : ""}
-    <div><button onClick={hideDetail}>X </button> </div>
-
+     {showDetail && 
+        <DetailTable  datedetail={detail.get(showDetail)} /> 
+     }
+    {/* (<div>
+        <DetailTable  datedetail={detail.get(showDetail)} /> 
+       <button className="anchor-[detail] [top:calc(anchor(bottom)+10px)] absolute z-101" onClick={hideDetail}>X </button> 
+     </div>) */} 
+      
     </div>
     
          
@@ -214,12 +224,12 @@ const  DetailTable =  ({datedetail}:{datedetail:[]})  =>{
     
 
      return (
-    <div className="anchor-[detail]  top-[50px] right-[20px]   absolute z-100 p-6  w-full bg-white shadow-lg ">
+    <div className="anchor-[detail]  top-[55px] right-[0px]   absolute z-100  w-full bg-white shadow-lg px-6">
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 text-center h-[120px]">
           <thead>
             <tr className="bg-gray-100 h-[25px]">
-              <th className="border px-4 py-2 text-left w-[20%]">{('days')}</th>
+              <th className="border px-4 py-2 text-left w-[20%]">{('Hour')}</th>
               { jsxs.map(arr => arr[0]) }             
              </tr>
           </thead>
