@@ -16,18 +16,18 @@ interface WeatherTableProps {
 } 
 
 // Helper functions
-const getUniqueIcons = (weatherData) => {
-  const icons = weatherData.map(x => WeatherArray.find(y => y[0] == x)[3]);
-  return icons.filter((x, i) => icons.findIndex(y => x == y) == i);
+const getUniqueIcons = (weatherData: any) => {
+  const icons = weatherData.map((x: any) => WeatherArray.find((y: any) => y[0] == x)[3]);
+  return icons.filter((x: any, i: number) => icons.findIndex((y: any) => x == y) == i);
 };
 
-const renderWeatherIcons = (icons) => {
-  return icons.map((icon, i) => (
+const renderWeatherIcons = (icons: any) => {
+  return icons.map((icon: any, i: number) => (
     <img key={`img-${i}`} className="w-6 h-6 inline-block" src={Icons[icon]} />
   ));
 };
 
-const DayHeader = ({ date, isSelected, onClick }) => (
+const DayHeader = ({ date, isSelected, onClick }: { date: any; isSelected: boolean; onClick: (date: any) => void }) => (
   <th 
     key={date} 
     className={`border px-4 py-2 w-[15%] cursor-pointer ${
@@ -39,7 +39,7 @@ const DayHeader = ({ date, isSelected, onClick }) => (
   </th>
 );
 
-const WeatherCell = ({ icons, date }) => {
+const WeatherCell = ({ icons, date }: { icons: any; date: any }) => {
   const hasFog = icons.includes('50d');
   return (
     <td key={`weather-${date}`} className="border px-4 py-2 w-[15%]">
@@ -58,7 +58,10 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
     const daily = weather.daily;
     const detail = weather.detail;
     
-    const showDetailOn = (date) => setShowDetail(date);
+    // Convert Map to array of [key, value] pairs
+    const dailyEntries = Array.from(daily.entries());
+    
+    const showDetailOn = (date: any) => setShowDetail(date);
     const hideDetail = () => setShowDetail("");
 
     return (
@@ -68,7 +71,7 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
             <thead>
               <tr className="bg-gray-100 h-[25px]">
                 <th className="border px-4 py-2 text-left w-[20%]">{t('days')}</th>
-                {daily.map((_, date) => (
+                {dailyEntries.map(([date, _]) => (
                   <DayHeader 
                     key={date}
                     date={date} 
@@ -81,14 +84,14 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
             <tbody>
               <tr className="h-[35px]">
                 <td className="border px-4 py-2 text-left w-[20%]">{name}</td>
-                {daily.map((item, date) => {
+                {dailyEntries.map(([date, item]) => {
                   const icons = getUniqueIcons(item.weather);
                   return <WeatherCell key={date} icons={icons} date={date} />;
                 })}
               </tr>
               <tr className="h-[30px]">
                 <td className="border px-4 py-2 text-left w-[20%]">{t('temp')}</td>
-                {daily.map((item, date) => (
+                {dailyEntries.map(([date, item]) => (
                   <td key={`temp-${date}`} className="border px-4 py-2 w-[15%]">
                     {item.min ? `${item.min}-${item.max}` : `${item.temp}`}
                   </td>
@@ -96,7 +99,7 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
               </tr>
               <tr className="h-[30px]">
                 <td className="border px-4 py-2 text-left w-[20%]">{t('pop')}</td>
-                {daily.map((item, date) => (
+                {dailyEntries.map(([date, item]) => (
                   <td key={`pop-${date}`} className="border px-4 py-2 w-[15%]">
                     {item.pop ? `${item.pop} ml` : t('noPrecipitation')}
                   </td>
@@ -120,17 +123,17 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
     );
 };
 
-const DetailTable = ({ datedetail }: { datedetail: [] }) => {
-  const sortWeatherIcons = (weather) => {
-    const sorted = [];
-    weather.forEach(w => 
+const DetailTable = ({ datedetail }: { datedetail: any[] }) => {
+  const sortWeatherIcons = (weather: any) => {
+    const sorted: any[] = [];
+    weather.forEach((w: any) => 
       w[1] === '50d' ? sorted.push(w) : sorted.unshift(w)
     );
     return sorted;
   };
 
-  const renderWeatherIcons = (weather) => (
-    sortWeatherIcons(weather).map((w, i) => (
+  const renderWeatherIcons = (weather: any) => (
+    sortWeatherIcons(weather).map((w: any, i: number) => (
       <img key={`img-${i}`} className="icon" src={Icons[w[1]]} />
     ))
   );
@@ -142,7 +145,7 @@ const DetailTable = ({ datedetail }: { datedetail: [] }) => {
           <thead>
             <tr className="bg-gray-100 h-[25px]">
               <th className="border px-4 py-2 text-left w-[20%]">Hour</th>
-              {datedetail.map(item => (
+              {datedetail.map((item: any) => (
                 <th key={item.time} className="border px-4 py-2 w-[10%]">
                   {item.time}
                 </th>
@@ -152,7 +155,7 @@ const DetailTable = ({ datedetail }: { datedetail: [] }) => {
           <tbody>
             <tr className="h-[35px]">
               <td className="border px-4 py-2 text-left w-[20%]">weather</td>
-              {datedetail.map(item => (
+              {datedetail.map((item: any) => (
                 <td key={`weather-${item.time}`} className="border px-4 py-2 w-[10%]">
                   {renderWeatherIcons(item.weather)}
                 </td>
@@ -160,7 +163,7 @@ const DetailTable = ({ datedetail }: { datedetail: [] }) => {
             </tr>
             <tr className="h-[30px]">
               <td className="border px-4 py-2 text-left w-[20%]">temp</td>
-              {datedetail.map(item => (
+              {datedetail.map((item: any) => (
                 <td key={`temp-${item.time}`} className="border px-4 py-2 w-[10%]">
                   {item.temp}
                 </td>
@@ -168,7 +171,7 @@ const DetailTable = ({ datedetail }: { datedetail: [] }) => {
             </tr>
             <tr className="h-[30px]">
               <td className="border px-4 py-2 text-left w-[20%]">pop</td>
-              {datedetail.map(item => (
+              {datedetail.map((item: any) => (
                 <td key={`pop-${item.time}`} className="border px-4 py-2 w-[10%]">
                   {item.pop ? `${item.pop} % ${item.ml} ml` : 'noPrecipitation'}
                 </td>
@@ -176,7 +179,7 @@ const DetailTable = ({ datedetail }: { datedetail: [] }) => {
             </tr>
             <tr className="h-[30px]">
               <td className="border px-4 py-2 text-left w-[20%]">humidity</td>
-              {datedetail.map(item => (
+              {datedetail.map((item: any) => (
                 <td key={`hum-${item.time}`} className="border px-4 py-2 w-[10%]">
                   {item.humidity}%
                 </td>
@@ -184,11 +187,11 @@ const DetailTable = ({ datedetail }: { datedetail: [] }) => {
             </tr>
             <tr className="h-[30px]">
               <td className="border px-4 py-2 text-left w-[20%]">wind</td>
-              {datedetail.map(item => (
+              {datedetail.map((item: any) => (
                 <td key={`wind-${item.time}`} className="border px-4 py-2 w-[10%]">
                   {item.ws} m/s {item.wd}
                 </td>
-              ))}
+              ))}}
             </tr>
           </tbody>
         </table>

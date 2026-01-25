@@ -11,60 +11,69 @@ export default function PlaceSelector({ onPlaceSelect }: PlaceSelectorProps) {
   const [placeName, setPlaceName] = useState('');
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
+  const mapInstance = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   useEffect(() => {
     // Load saved place from cookie
-    const savedPlace = getPlaceFromCookie();
-    if (savedPlace) {
-      setPlaceName(savedPlace.name);
-      setCoordinates({ lat: savedPlace.lat, lon: savedPlace.lon });
-    }
+    const loadSavedPlace = async () => {
+      const savedPlace = await getPlaceFromCookie();
+      if (savedPlace) {
+        setPlaceName(savedPlace.name);
+        setCoordinates({ lat: savedPlace.lat, lon: savedPlace.lon });
+      }
+    };
+    
+    loadSavedPlace();
 
     // Initialize Google Maps
-    if (window.google && mapRef.current) {
-      const map = new google.maps.Map(mapRef.current, {
-        center: savedPlace ? { lat: savedPlace.lat, lng: savedPlace.lon } : { lat: 35.6762, lng: 139.6503 },
-        zoom: 10,
-      });
+    const initMap = () => {
+      if ((window as any).google && mapRef.current) {
+        const map = new (window as any).google.maps.Map(mapRef.current, {
+          center: coordinates ? { lat: coordinates.lat, lng: coordinates.lon } : { lat: 35.6762, lng: 139.6503 },
+          zoom: 10,
+        });
 
-      mapInstance.current = map;
+        mapInstance.current = map;
 
-      if (savedPlace) {
-        markerRef.current = new google.maps.Marker({
-          position: { lat: savedPlace.lat, lng: savedPlace.lon },
-          map: map,
+        if (coordinates) {
+          markerRef.current = new (window as any).google.maps.Marker({
+            position: { lat: coordinates.lat, lng: coordinates.lon },
+            map: map,
+          });
+        }
+
+        map.addListener('click', (e: any) => {
+          const lat = e.latLng!.lat();
+          const lng = e.latLng!.lng();
+          
+          setCoordinates({ lat, lon: lng });
+          
+          if (markerRef.current) {
+            markerRef.current.setMap(null);
+          }
+          
+          markerRef.current = new (window as any).google.maps.Marker({
+            position: { lat, lng },
+            map: map,
+          });
+
+          // Get place name from coordinates
+          const geocoder = new (window as any).google.maps.Geocoder();
+          geocoder.geocode({ location: { lat, lng } }, (results: any, status: any) => {
+            if (status === 'OK' && results?.[0]) {
+              setPlaceName(results[0].formatted_address);
+            }
+          });
         });
       }
+    };
+    
+    // Delay map initialization to ensure coordinates are loaded
+    setTimeout(initMap, 100);
+  }, [coordinates]);
 
-      map.addListener('click', (e: google.maps.MapMouseEvent) => {
-        const lat = e.latLng!.lat();
-        const lng = e.latLng!.lng();
-        
-        setCoordinates({ lat, lon: lng });
-        
-        if (markerRef.current) {
-          markerRef.current.setMap(null);
-        }
-        
-        markerRef.current = new google.maps.Marker({
-          position: { lat, lng },
-          map: map,
-        });
-
-        // Get place name from coordinates
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-          if (status === 'OK' && results?.[0]) {
-            setPlaceName(results[0].formatted_address);
-          }
-        });
-      });
-    }
-  }, []);
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (placeName && coordinates) {
       const place: PlaceData = {
         name: placeName,
@@ -72,7 +81,7 @@ export default function PlaceSelector({ onPlaceSelect }: PlaceSelectorProps) {
         lon: coordinates.lon,
       };
       
-      savePlaceToCookie(place);
+      await savePlaceToCookie(place);
       onPlaceSelect?.(place);
       alert('Place saved successfully!');
     }

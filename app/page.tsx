@@ -8,12 +8,10 @@ import {Currentrow} from "./ui/currentrow";
 
 
 export default async function Home() {
-  const  cookie:  {lat:number, lng:number, name:string}[] = await getPlaceFromCookie();
+  const cookie = await getPlaceFromCookie();
   const showcurrent = true; //  await getShowCurrentPlace();
-  const  places:{name :string, lat: number, lng: number, url: string}[] | [] = 
-  cookie.map(el => {
-     return  {'name': el.name, 'lat': el.lat, 'lng': el.lng, 'url': ""}
-});  
+  const places: {name: string, lat: number, lng: number, url: string}[] = 
+    cookie ? [{'name': cookie.name, 'lat': cookie.lat, 'lng': cookie.lon, 'url': ""}] : [];  
 
   return (
     <>

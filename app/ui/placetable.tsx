@@ -6,20 +6,26 @@ import LeafletPlaceSelector from "./leaflet-place-selector";
 
 export default function PlaceTable( ){
   
-  const [current, setCurrent] = useState<PlaceData[] | []> ([]);
-  const [places, setPlaces] = useState<PlaceData[] | []>([]);
+  const [current, setCurrent] = useState<PlaceData | null>(null);
+  const [places, setPlaces] = useState<PlaceData[]>([]);
   const [selector, setSelector] = useState(false);
   const [saved, setSaved] = useState(false);
   
   useEffect( () => {
     (async () =>  {
     if(saved == true) {
-    await savePlaceToCookie(places);
-    setSaved(false);
+      // Save only the first place since our cookie structure supports single place
+      if (places.length > 0) {
+        await savePlaceToCookie(places[0]);
+      }
+      setSaved(false);
     } else {
-      let  current = await getPlaceFromCookie();
+      let current = await getPlaceFromCookie();
       console.log(current);
       setCurrent(current);
+      if (current) {
+        setPlaces([current]);
+      }
     }
   })() 
   }  , [saved] )
@@ -27,25 +33,25 @@ export default function PlaceTable( ){
   const up = (place:PlaceData) => {
     let newplaces = places.slice();
     let index = places.findIndex(el => el === place);
-    if(index == 0){
-    newplaces.splice(index-1,0,  place);
-    setPlaces(newplaces);
+    if(index > 0){
+      newplaces.splice(index-1, 0, newplaces.splice(index, 1)[0]);
+      setPlaces(newplaces);
     }
 }
 
   const down = (place:PlaceData) => {
     let newplaces = places.slice();
     let index = places.findIndex(el => el === place);
-    if(index == places.length-1){
-    newplaces.splice(index-1,0,  place);
-    setPlaces(newplaces);
+    if(index < places.length-1){
+      newplaces.splice(index+1, 0, newplaces.splice(index, 1)[0]);
+      setPlaces(newplaces);
     }
   }
 
 
   const deletePlace = (place: PlaceData) => {
-    const newPlaces:PlaceData[] | [] = places?.filter(p => p.name !== place.name);
-    newPlaces != undefined && setPlaces(newPlaces);
+    const newPlaces = places.filter(p => p.name !== place.name);
+    setPlaces(newPlaces);
   };
 
   const toggleSelector = () => setSelector(!selector);
@@ -53,8 +59,7 @@ export default function PlaceTable( ){
   
   
 const addPlace = (placedata:PlaceData):void  =>  {     
-  if (placedata.lat &&  placedata.lng &&  placedata.name) {
-  
+  if (placedata.lat &&  placedata.lon &&  placedata.name) {
         setPlaces([placedata, ...places]);
         alert('Place saved successfully!');
     }
@@ -65,7 +70,11 @@ const savePlalces = ()  => {
 }
 
 const cancel = () => {
-  setPlaces(current);
+  if (current) {
+    setPlaces([current]);
+  } else {
+    setPlaces([]);
+  }
 }
   
 
@@ -81,7 +90,7 @@ const cancel = () => {
       </div> 
       <div className="leaflet-add">
          <button onClick={() => toggleSelector() }>
-           { selector ? <span className="map colse">Add Place</span> : <span className="map open">Close Map</span> }
+           { selector ? <span className="map close">Close Map</span> : <span className="map open">Add Place</span> }
          </button> 
     { selector && <LeafletPlaceSelector  onsave={ addPlace }  currentPlaces={places} /> }
 
@@ -101,9 +110,9 @@ const cancel = () => {
         </tr>
       </thead>
       <tbody>
-        {  places.map?.(place =>  
+        {  places.map((place, index) =>  
         (
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+          <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
               {place.name}
             </td>
@@ -111,10 +120,9 @@ const cancel = () => {
               {place.lat}
             </td>
             <td className="px-6 py-4">
-              {place.lng}
+              {place.lon}
             </td>
             <td className="px-6 py-4">
-           
               <div>
                 <button onClick={() => up(place)}>UP</button>
                 <button onClick={() => down(place)}>DOWN</button>

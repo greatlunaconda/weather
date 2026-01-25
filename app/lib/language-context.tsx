@@ -121,7 +121,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.cookie = `language=${lang}; path=/; max-age=31536000`;
   };
 
-  const t = (key: string) => translations[language][key] || key;
+  const t = (key: string) => (translations[language] as any)[key] || key;
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

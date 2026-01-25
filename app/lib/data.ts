@@ -1,6 +1,11 @@
 import { WritableStreamDefaultWriter } from "node:stream/web";
 
-type WeatherJson = Object;
+type WeatherJson = {
+  city: {
+    timezone: number;
+  };
+  list: any[];
+};
 
 export  async function  fetchWeather(lat: number, lon: number, url ='') {
   if (url == ''){
@@ -8,7 +13,7 @@ export  async function  fetchWeather(lat: number, lon: number, url ='') {
   } 
   
   console.log("url = " + url);
-  const res = await fetch(url).catch(err=> console.log("something wrong", err));
+  const res = await fetch(url).catch((err: any)=> console.log("something wrong", err));
   
   if (!res?.ok) {
     throw new Error(`HTTP error! status: ${res?.status}`);
@@ -31,7 +36,7 @@ export  async function  fetchWeather(lat: number, lon: number, url ='') {
 function getDayMap(weatherjson: WeatherJson){
   var dayMap = new Map();
   const tz = weatherjson.city.timezone / 60;
- (weatherjson['list']).forEach(entry => {  
+ (weatherjson['list']).forEach((entry: any) => {  
   // UNIX timestamp を JST に変換
     let date = new Date(entry.dt * 1000);
     const tzo = date.getTimezoneOffset();
@@ -49,57 +54,57 @@ function getDayMap(weatherjson: WeatherJson){
 }
 function getDaily(dayMap: any)  {
   var dailyMap  = new  Map();  
-  dayMap.forEach((ent, date) => {
-    let  dailyobj = {};
-    const weathers = ent.map(ent1 => ent1.weather);
+  dayMap.forEach((ent: any, date: string) => {
+    let  dailyobj: any = {};
+    const weathers = ent.map((ent1: any) => ent1.weather);
 
     
     switch(ent.length){
       case 8: 
         
         var rweather = weathers[3].concat(weathers[6]);
-        var rids = rweather.map(ent => ent.id);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i);
+        var rids = rweather.map((ent: any) => ent.id);
+        rids = rids.filter((x: any, i: number) => rids.indexOf(x) == i);
         dailyobj['weather'] = rids; 
         
       break;
 
       case 1:
-        dailyobj['weather'] = weathers[0].map( x => x.id) ;
+        dailyobj['weather'] = weathers[0].map((x: any) => x.id) ;
       break;
       case 2:  
-        dailyobj['weather'] = weathers[1].map( x => x.id); 
+        dailyobj['weather'] = weathers[1].map((x: any) => x.id); 
       break;
       case 3: 
         var rweather = weathers[0].concat(weathers[2]);
-        var rids = rweather.map(x => x.id);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        var rids = rweather.map((x: any) => x.id);
+        rids = rids.filter((x: any, i: number) => rids.indexOf(x) == i); 
         dailyobj['weather'] = rids; 
       break;
       case 4:
         var rweather = weathers[1].concat(weathers[3]);
-        var rids = rweather.map(x => x.id)
-        rids = rids.filter((x, i) => rids.indexOf(x) == i); 
+        var rids = rweather.map((x: any) => x.id)
+        rids = rids.filter((x: any, i: number) => rids.indexOf(x) == i); 
         dailyobj['weather'] = rids;
       break;
       case 5:  
         var rweather = weathers[1].concat(weathers[4]);
-        var rids = rweather.map(x => x.id);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i) 
+        var rids = rweather.map((x: any) => x.id);
+        rids = rids.filter((x: any, i: number) => rids.indexOf(x) == i) 
         dailyobj['weather'] = rids;  
       break;
       case 6: 
        var rweather = weathers[2].concat(weathers[5]);
-       var rids = rweather.map(x => x.id);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i) 
+       var rids = rweather.map((x: any) => x.id);
+        rids = rids.filter((x: any, i: number) => rids.indexOf(x) == i) 
         dailyobj['weather'] = rids;  
 
        // var rids = (wids[2]).concat(wids[5]);
       break; 
       case 7:
         var rweather = weathers[2].concat(weathers[6]);
-        var rids = rweather.map(x => x.id);
-        rids = rids.filter((x, i) => rids.indexOf(x) == i) 
+        var rids = rweather.map((x: any) => x.id);
+        rids = rids.filter((x: any, i: number) => rids.indexOf(x) == i) 
         dailyobj['weather'] = rids;  
  
        // var rids = (wids[2]).concat(wids[6]); 
@@ -107,18 +112,18 @@ function getDaily(dayMap: any)  {
       default: console.log("something wrong");        
         }
              
-      let temps = dayMap.get(date).map( entry => Math.round(Number(entry.main.temp) - 273.15) );
+      let temps = dayMap.get(date).map((entry: any) => Math.round(Number(entry.main.temp) - 273.15) );
       let min = Math.min(...temps);
       let max = Math.max(...temps);
       if (max == min) {dailyobj['temp'] =  max;} 
       else { dailyobj['min'] = min; 
         dailyobj['max'] = max; }
       
-      let pops = dayMap.get(date).map(entry => Number(entry.pop));    
+      let pops = dayMap.get(date).map((entry: any) => Number(entry.pop));    
       dailyobj['pop'] = Math.max(...pops);
     
-      let mls = dayMap.get(date).map( entry => entry.rain ? entry.rain["3h"] : ' ');
-      dailyobj['ml'] = mls.reduce((a=0, ml) => ml != ' '? a+= ml : a );
+      let mls = dayMap.get(date).map((entry: any) => entry.rain ? entry.rain["3h"] : ' ');
+      dailyobj['ml'] = mls.reduce((a: number = 0, ml: any) => ml != ' '? a+= ml : a );
       dailyMap.set(date, dailyobj);
       
       });
@@ -130,13 +135,13 @@ function getDaily(dayMap: any)  {
     
 function getDetail(dayMap: any){
   var detailMap = new Map();
-  dayMap.forEach((entry, date) => {
+  dayMap.forEach((entry: any, date: string) => {
     detailMap.set(date, []); 
-    entry.forEach(ent => {
-      const detobj = {};  
+    entry.forEach((ent: any) => {
+      const detobj: any = {};  
       detobj['time'] = ent.time;
      
-      detobj['weather'] = ent.weather.map(x => [x.id, x.icon]);
+      detobj['weather'] = ent.weather.map((x: any) => [x.id, x.icon]);
     
       detobj['temp'] = Math.round(Number(ent.main.temp - 273.15)); 
       detobj['pop'] = ent.pop*100;

@@ -5,25 +5,28 @@ import { cookies } from 'next/headers';
 export interface PlaceData {
   name: string;
   lat: number;
-  lng: number;
+  lon: number;
 }
 
-export  async function savePlaceToCookie(places: PlaceData[] | []): Promise<void> {
-  await  cookies().set('place', JSON.stringify(places), {
+export async function savePlaceToCookie(place: PlaceData): Promise<void> {
+  const cookies = await import('next/headers').then(m => m.cookies);
+  await cookies().set('place', JSON.stringify(place), {
     path: '/',
     maxAge: 31536000
   });
 }
 
-export  async function getPlaceFromCookie(): Promise<PlaceData[] | []> {
+export async function getPlaceFromCookie(): Promise<PlaceData | null> {
+  const cookies = await import('next/headers').then(m => m.cookies);
   const placeCookie = await cookies().get('place');
-  if (placeCookie) {    try {
+  if (placeCookie) {
+    try {
       return JSON.parse(placeCookie.value);
     } catch {
-      Error("shmething wrong on parsing cookies");
+      console.error("Error parsing place cookie");
     }
   }
-  return [];
+  return null;
 }
 
 export async  function  getShowCurrentPlace() {

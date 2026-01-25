@@ -58,7 +58,7 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
 
         // Add marker if saved place exists
          savedPlaceses.forEach?.(el => {
-           L.marker([el.lat, el.lng]).addTo(map);
+           L.marker([el.lat, el.lon]).addTo(map);
         });
          
 
@@ -124,7 +124,7 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
       )}
       
       <button
-        onClick= {() => coordinates && onsave?.( {"name": placename, "lat": coordinates.lat, "lng":coordinates.lng} as PlaceData)
+        onClick= {() => coordinates && onsave?.( {"name": placename, "lat": coordinates.lat, "lon":coordinates.lng} as PlaceData)
  } 
         disabled={!placename || !coordinates}
         className="w-full bg-blue-500 text-white p-2 rounded disabled:bg-gray-300"
