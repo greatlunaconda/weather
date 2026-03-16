@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {Language, getLanguage, saveLanguage } from '../lib/cookies';
 
-type Language = 'english' | 'japanese' | 'chinese' | 'russian' | 'spanish' | 'french' | 'arabic';
 
 interface LanguageContextType {
   language: Language;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useLanguage } from "../lib/language-context";
+import { useLanguage } from "../contexts/language-context";
 
 export default function Menu() {
   const [menu, setMenu] = useState(false);

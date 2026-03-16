@@ -3,15 +3,21 @@
 import { useEffect, useState } from "react";
 import { fetchWeather } from "../lib/data";
 import Row from "./row";
+import{useRef} from 'react';
 
-export function Currentrow(){
+export function Currentrow({num}:{num:Number}){
 const [place, setPlace] = useState({lat:190, lng:190});
 const [name, setName] = useState("");  
 const [weather, setWeather] = useState<any>(null);
+const [showcurrent, setShowCurrent] = useState(num == 0);
+const [loading, setLoading] = useState(false);
+
 console.log("Currentrow component mounted");
   useEffect(() => {
+    if (showcurrent){
+    setLoading(true);
     console.log("useEffect started");
-    const load = async () => {
+    (async () => {
       navigator.geolocation.getCurrentPosition(async (pos) => {
         console.log("geolocation success");
         const newPlace = {lat: pos.coords.latitude, lng: pos.coords.longitude};
@@ -34,17 +40,30 @@ console.log("Currentrow component mounted");
         if (data) {
           console.log("Weather data received");
           setWeather(data);
+          setLoading(false);
         }
       }, (error) => console.log("Geolocation error:", error));
-    }
-    
-    load();
-  }, []);
+    } 
+  )();
+  
+  }
+}, []);
      console.log("useEffect end");
     return (
-      <div>
-        {weather ? <Row name={name} weather={weather} /> : <div>Loading weather data...</div>}
+      <>
+      <div className={`"absolute top-[3px] left-[10%]"+ ${showcurrent ? " green-100  disabled": " green-800 "}`}>       
+        <button onClick={() => setShowCurrent(true)}> Current Place </button> 
+        <button onClick={() => setShowCurrent(!false)}> Current Place </button> 
       </div>
+      
+        {showcurrent && 
+        <div>
+         loading ?  <div>Loading  data....</div> :
+        <Row name={name} weather={weather} />          
+         </div>
+         }
+      
+      </>
     );
     }
 

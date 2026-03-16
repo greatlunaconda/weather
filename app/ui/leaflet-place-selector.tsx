@@ -1,34 +1,72 @@
 'use client'
-
+import { preload } from 'react-dom';
 import { useState, useRef, useEffect } from 'react';
-import { savePlaceToCookie, getPlaceFromCookie, PlaceData } from '../lib/cookies';
+import { PlaceData } from '../lib/cookies';
 
 export interface LeafletSaveProps {
   onsave: (placedata: PlaceData ) => void;
 }
 
+
+preload('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', { as: 'style' });
+
+
+async function getPlaceName({lat, lng}:{ lat:number, lng:number} ){
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+              {
+                headers: {
+                  'User-Agent': 'WeatherApp/1.0'
+                }
+              }
+            );
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Geocoding response:', data); // Debug log
+            
+            if (data.display_name) {
+              return data.display_name;
+            } else if (data.address) {
+              // Fallback to constructing name from address components
+              const parts = [];
+              if (data.address.city) parts.push(data.address.city);
+              if (data.address.state) parts.push(data.address.state);
+              if (data.address.country) parts.push(data.address.country);
+              return parts.join(', ') || `Location ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            } else {
+              // Fallback to coordinates
+              return `Location ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            }
+          } catch (error) {
+            console.error('Geocoding error:', error);
+            // Fallback to coordinates if geocoding fails
+            return `Location ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          }
+  }
+
+
+
 export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave: (placedata: PlaceData) => void;  currentPlaces : PlaceData[] | []; }) {
   const [placename, setPlaceName] = useState("");
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }|null>(null) ;
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markerRef = useRef<any>(null);
+
+
 
   useEffect(() => {
     const loadLeaflet = async () => {
       if (typeof window === 'undefined') return;
 
-      // Load Leaflet CSS
-      if (!document.querySelector('link[href*="leaflet.css"]')) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
-      }
-
       // Dynamically import Leaflet
       const leaflet = await import('leaflet');
-      const L = leaflet.default || leaflet;
+      const L = leaflet.default || leaflet; 
       
       // Fix for Leaflet default markers
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -57,38 +95,28 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
         mapInstance.current = map;
 
         // Add marker if saved place exists
-         savedPlaceses.forEach?.(el => {
-           L.marker([el.lat, el.lon]).addTo(map);
+        savedPlaceses.forEach?.(el => {
+          if (el && typeof el.lat === 'number' && typeof el.lon === 'number') {
+            L.marker([el.lat, el.lon]).addTo(map);
+          }
         });
-         
-
 
         // Handle map clicks
         map.on('click', async (e: any) => {
           const { lat, lng } = e.latlng;
           setCoordinates({ lat, lng });
           
-    //      Remove existing marker
+          // Remove existing marker
           if (markerRef.current) {
             map.removeLayer(markerRef.current);
           }
           
           // Add new marker
           markerRef.current = L.marker([lat, lng]).addTo(map);
-
+          
           // Get place name using Nominatim (OpenStreetMap's geocoding service)
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
-            );
-            const data = await response.json();
-            if (data.display_name) {
-              
-              setPlaceName(data.display_name);
-            }
-          } catch (error) {
-            console.error('Geocoding');
-          }
+          coordinates && setPlaceName(await getPlaceName(coordinates));
+          
         });
       }
     };  
@@ -124,12 +152,16 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
       )}
       
       <button
-        onClick= {() => coordinates && onsave?.( {"name": placename, "lat": coordinates.lat, "lon":coordinates.lng} as PlaceData)
- } 
+        onClick={() => {
+          if (coordinates && placename) {
+            console.log('Saving place:', { name: placename, lat: coordinates.lat, lon: coordinates.lng }); // Debug log
+            onsave({ name: placename, lat: coordinates.lat, lon: coordinates.lng } as PlaceData);
+          }
+        }}
         disabled={!placename || !coordinates}
         className="w-full bg-blue-500 text-white p-2 rounded disabled:bg-gray-300"
-        >
-        Add
+      >
+        Add Place
       </button>
     </div>
   

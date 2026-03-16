@@ -15,16 +15,17 @@ export default function PlaceSelector({ onPlaceSelect }: PlaceSelectorProps) {
   const markerRef = useRef<any>(null);
 
   useEffect(() => {
-    // Load saved place from cookie
-    const loadSavedPlace = async () => {
-      const savedPlace = await getPlaceFromCookie();
-      if (savedPlace) {
-        setPlaceName(savedPlace.name);
-        setCoordinates({ lat: savedPlace.lat, lon: savedPlace.lon });
+    // Load saved places from cookie
+    const loadSavedPlaces = async () => {
+      const savedPlaces = await getPlaceFromCookie();
+      if (savedPlaces.length > 0) {
+        const firstPlace = savedPlaces[0];
+        setPlaceName(firstPlace.name);
+        setCoordinates({ lat: firstPlace.lat, lon: firstPlace.lon });
       }
     };
     
-    loadSavedPlace();
+    loadSavedPlaces();
 
     // Initialize Google Maps
     const initMap = () => {

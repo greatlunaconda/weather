@@ -1,0 +1,155 @@
+'use client'
+import { useEffect, useState } from "react";
+import { getPlacesFromCookie, PlaceData, savePlacesToCookie} from "../lib/cookies"
+import LeafletPlaceSelector from "./leaflet-place-selector";
+
+
+export default function PlaceTable( ){
+  
+  const [current, setCurrent] = useState<PlaceData[] | null>(null);
+  const [places, setPlaces] = useState<PlaceData[]>([]);
+  const [selector, setSelector] = useState(false);
+  const [cansave, setCanSave] = useState(false);
+  const [saved, setSaved] = useState(false);
+  
+  useEffect( () => {
+    (async () =>  {
+    if(saved == true) {
+      // Save all places to cookie
+   //   for (const place of places) {
+   //     await savePlaceToCookie(place);
+    //  }
+    await savePlacesToCookie(places);
+      setCanSave(false);
+      setSaved(false);
+    } else {
+      let currentPlaces = await getPlacesFromCookie();
+      console.log(currentPlaces);
+      setCurrent(currentPlaces);
+      setPlaces(currentPlaces);
+    }
+  })() 
+  }  , [saved] )
+  
+  const up = (place:PlaceData) => {
+    let newplaces = places.slice();
+    let index = places.findIndex(el => el === place);
+    if(index > 0){
+      newplaces.splice(index-1, 0, newplaces.splice(index, 1)[0]);
+      setPlaces(newplaces);
+      setCanSave(true);
+    }
+}
+
+  const down = (place:PlaceData) => {
+    let newplaces = places.slice();
+    let index = places.findIndex(el => el === place);
+    if(index < places.length-1){
+      newplaces.splice(index+1, 0, newplaces.splice(index, 1)[0]);
+      setPlaces(newplaces);
+      setCanSave(true);
+    }
+  }
+
+
+  const deletePlace = (place: PlaceData) => {
+    const newPlaces = places.filter(p => p.name !== place.name);
+    setPlaces(newPlaces);
+    setCanSave(true);
+  };
+
+  const toggleSelector = () => setSelector(!selector);
+
+  
+  
+const addPlace = (placedata:PlaceData):void  =>  {     
+  if (placedata.lat &&  placedata.lon &&  placedata.name) {
+        setPlaces([placedata, ...places]);
+        alert('Place saved successfully!');
+        setCanSave(true);
+    }
+
+  };
+
+const savePlalces = ()  => {
+  if (cansave){
+  setSaved(true);
+  }
+}
+
+const cancel = () => {
+  if (current) {
+    setPlaces(current);
+  } else {
+    setPlaces([]);
+
+  }
+  setCanSave(false);
+}
+  
+
+  return (
+    <div>
+      <div className="mb-4 space-x-2"> 
+        <button onClick={savePlalces} disabled={!cansave} className={cansave?"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded": "bg-blue-100 hover:bg-blue-100 text-white font-bold py-2 px-4 rounded"}>
+          Save
+        </button>
+        <button onClick={cancel} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+          Cancel
+        </button>
+        
+      </div> 
+      <div className="mb-4">
+         <button onClick={() => toggleSelector()} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+           { selector ? "Close Map" : "Open Map" }
+         </button> 
+    { selector && <LeafletPlaceSelector  onsave={ addPlace }  currentPlaces={places} /> }
+
+     </div>
+    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+      <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th scope="col" className="px-6 py-3">
+            Name
+          </th>
+          <th scope="col" className="px-6 py-3">
+            Latitude
+          </th>
+          <th scope="col" className="px-6 py-3">
+            Longitude
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {  places.map((place, index) =>  
+        (
+          <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              {place.name}
+            </td>
+            <td className="px-6 py-4">
+              {place.lat}
+            </td>
+            <td className="px-6 py-4">
+              {place.lon}
+            </td>
+            <td className="px-6 py-4">
+              <div>
+                <button onClick={() => up(place)}>UP</button>
+                <button onClick={() => down(place)}>DOWN</button>
+              </div> 
+            </td>
+            <td className="px-6 py-4">
+              <button onClick={() => deletePlace(place)}>
+              Delete 
+              </button>
+              </td>
+          </tr>
+        )
+      ) 
+      } 
+      </tbody>
+    </table>
+</div>
+ )
+}

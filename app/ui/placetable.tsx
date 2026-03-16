@@ -1,98 +1,156 @@
 'use client'
-import { useEffect, useState } from "react";
-import { getPlaceFromCookie, PlaceData, savePlaceToCookie } from "../lib/cookies"
+import { useEffect, useReducer } from "react";
+import { getPlacesFromCookie, PlaceData, savePlacesToCookie} from "../lib/cookies"
 import LeafletPlaceSelector from "./leaflet-place-selector";
+import { canvas } from "leaflet";
 
+type State = {
+  current: PlaceData[] ;
+  places: PlaceData[];
+  selector: boolean;
+  cansave: boolean;
+};
 
-export default function PlaceTable( ){
+type Action =
+  | { type: 'SET_CURRENT'; payload: PlaceData[] }
+  | { type: 'SET_PLACES'; payload: PlaceData[] }
+  | { type: 'TOGGLE_SELECTOR' }
+  | { type: 'SET_CANSAVE'; payload: boolean }
+  | { type: 'SAVE_PLACES'}
+  | { type: 'MOVE_UP'; payload: PlaceData }
+  | { type: 'MOVE_DOWN'; payload: PlaceData }
+  | { type: 'DELETE_PLACE'; payload: PlaceData }
+  | { type: 'ADD_PLACE'; payload: PlaceData }
+  | { type: 'CANCEL' };
+
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'SET_CURRENT':
+      return { ...state, current: action.payload, places: action.payload };
+    case 'SET_PLACES':
+      
+      return { ...state, places: action.payload };
+    case 'TOGGLE_SELECTOR':
+      return { ...state, selector: !state.selector };
+    case 'SET_CANSAVE':
+      return { ...state, cansave: action.payload };
+    case 'SAVE_PLACES':   
+      return {...state, places:state.current, cansave:false };
+    case 'MOVE_UP': {
+      const index = state.current.findIndex(el => el === action.payload);
+      if (index > 0) {
+        const newplaces = state.current.slice();
+        newplaces.splice(index - 1, 0, newplaces.splice(index, 1)[0]);
+        return { ...state, current: newplaces, cansave: true };
+      }
+      return state;
+    }
+    case 'MOVE_DOWN': {
+      const index = state.current.findIndex(el => el === action.payload);
+      if (index < state.current.length - 1) {
+        const newplaces = state.current.slice();
+        newplaces.splice(index + 1, 0, newplaces.splice(index, 1)[0]);
+        return { ...state, current: newplaces, cansave: true };
+      }
+      return state;
+    }
+    case 'DELETE_PLACE':
+      return {
+        ...state,
+        places: state.places.filter(p => p.name !== action.payload.name),
+        cansave: true
+      };
+    case 'ADD_PLACE':
+      return {
+        ...state,
+        places: [action.payload, ...state.places],
+        cansave: true
+      };
+    case 'CANCEL':
+      return {
+        ...state,
+        places: state.current || [],
+        cansave: false
+      };
+    default:
+      return state;
+  }
+};
+
+export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], savePlaces: (newplaces:PlaceData[] | null) => void })
+
+  {
   
-  const [current, setCurrent] = useState<PlaceData | null>(null);
-  const [places, setPlaces] = useState<PlaceData[]>([]);
-  const [selector, setSelector] = useState(false);
-  const [saved, setSaved] = useState(false);
-  
+  const [state, dispatch] = useReducer(reducer, {
+    current: places,
+    places: places,
+    selector: false,
+    cansave: false,
+  });
+/*  
   useEffect( () => {
     (async () =>  {
-    if(saved == true) {
-      // Save only the first place since our cookie structure supports single place
-      if (places.length > 0) {
-        await savePlaceToCookie(places[0]);
-      }
-      setSaved(false);
+    if(state.saved == true) {
+      await savePlacesToCookie(state.places);
+      dispatch({ type: 'SET_CANSAVE', payload: false });
+      dispatch({ type: 'SET_SAVED', payload: false });
     } else {
-      let current = await getPlaceFromCookie();
-      console.log(current);
-      setCurrent(current);
-      if (current) {
-        setPlaces([current]);
-      }
+      let currentPlaces = await getPlacesFromCookie();
+      console.log(currentPlaces);
+      dispatch({ type: 'SET_CURRENT', payload: currentPlaces });
     }
   })() 
-  }  , [saved] )
-  
+  }  , [state.saved] )
+  */
   const up = (place:PlaceData) => {
-    let newplaces = places.slice();
-    let index = places.findIndex(el => el === place);
-    if(index > 0){
-      newplaces.splice(index-1, 0, newplaces.splice(index, 1)[0]);
-      setPlaces(newplaces);
-    }
-}
+    dispatch({ type: 'MOVE_UP', payload: place });
+  };
 
   const down = (place:PlaceData) => {
-    let newplaces = places.slice();
-    let index = places.findIndex(el => el === place);
-    if(index < places.length-1){
-      newplaces.splice(index+1, 0, newplaces.splice(index, 1)[0]);
-      setPlaces(newplaces);
-    }
-  }
-
+    dispatch({ type: 'MOVE_DOWN', payload: place });
+  };
 
   const deletePlace = (place: PlaceData) => {
-    const newPlaces = places.filter(p => p.name !== place.name);
-    setPlaces(newPlaces);
+    dispatch({ type: 'DELETE_PLACE', payload: place });
   };
 
-  const toggleSelector = () => setSelector(!selector);
+  const toggleSelector = () => dispatch({ type: 'TOGGLE_SELECTOR' });
 
-  
-  
-const addPlace = (placedata:PlaceData):void  =>  {     
-  if (placedata.lat &&  placedata.lon &&  placedata.name) {
-        setPlaces([placedata, ...places]);
-        alert('Place saved successfully!');
+  const addPlace = (placedata:PlaceData):void  =>  {     
+    if (placedata.lat &&  placedata.lon &&  placedata.name) {
+      dispatch({ type: 'ADD_PLACE', payload: placedata });
+      alert('Place saved successfully!');
     }
   };
 
-const savePlalces = ()  => {
-  setSaved(true);
-}
+  const savePlalces = ()  => {
+    if(state.cansave){
+      savePlaces(state.current)  
+      dispatch({ type: 'SAVE_PLACES'});
+    }
+  };
 
-const cancel = () => {
-  if (current) {
-    setPlaces([current]);
-  } else {
-    setPlaces([]);
-  }
-}
+  const cancel = () => {
+    dispatch({ type: 'CANCEL' });
+  };
   
 
   return (
     <div>
-      <div> 
-        <button onClick ={savePlalces}>
+      <div className="mb-4 space-x-2"> 
+        <button onClick={savePlalces} disabled={!state.cansave} className={state.cansave?"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded": "bg-blue-100 hover:bg-blue-100 text-white font-bold py-2 px-4 rounded"}>
           Save
         </button>
-        <button onClick={cancel}>
+        <button onClick={cancel} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
           Cancel
         </button>
+        
       </div> 
-      <div className="leaflet-add">
-         <button onClick={() => toggleSelector() }>
-           { selector ? <span className="map close">Close Map</span> : <span className="map open">Add Place</span> }
+      <div className="mb-4">
+         <button onClick={() => toggleSelector()} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+           { state.selector ? "Close Map" : "Open Map" }
          </button> 
-    { selector && <LeafletPlaceSelector  onsave={ addPlace }  currentPlaces={places} /> }
+    { state.selector && <LeafletPlaceSelector  onsave={ addPlace }  currentPlaces={state.places} /> }
 
      </div>
     <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -110,7 +168,7 @@ const cancel = () => {
         </tr>
       </thead>
       <tbody>
-        {  places.map((place, index) =>  
+        {  state.places.map((place, index) =>  
         (
           <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">

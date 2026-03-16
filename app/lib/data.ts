@@ -1,3 +1,4 @@
+'use server'
 import { WritableStreamDefaultWriter } from "node:stream/web";
 
 type WeatherJson = {
@@ -26,6 +27,8 @@ export  async function  fetchWeather(lat: number, lon: number, url ='') {
   }
   
   const weatherjson = await res.json();
+  console.log(weatherjson.city.name);
+  
   const daymap =  getDayMap(weatherjson);
   const daily = getDaily(daymap);
   const detail = getDetail(daymap);
@@ -120,16 +123,26 @@ function getDaily(dayMap: any)  {
         dailyobj['max'] = max; }
       
       let pops = dayMap.get(date).map((entry: any) => Number(entry.pop));    
-      dailyobj['pop'] = Math.max(...pops);
-    
-      let mls = dayMap.get(date).map((entry: any) => entry.rain ? entry.rain["3h"] : ' ');
-      dailyobj['ml'] = mls.reduce((a: number = 0, ml: any) => ml != ' '? a+= ml : a );
+      dailyobj['pop'] = (Math.round((Math.max(...pops) *10))) * 10;
+      
+      if(dailyobj['pop'] != 0) {
+      let mls = dayMap.get(date).map((entry: any) => { if (entry.rain) {if(entry['rain']['3h'] != '') { return entry['rain']["3h"];} else {return 0;} }  
+                                                  else if (entry.snow) {if(entry['snow']['3h'] != '') { return entry['snow']["3h"];} else {return 0;} }  
+
+                                                  else {return 0;} });
+      
+      dailyobj['ml'] = mls.reduce((a: number = 0, ml: any) => ml != null ? a+= ml : a );
+      dailyobj['ml'] = dailyobj['ml'] >= 1 ? Math.round(dailyobj['ml']): Math.round(dailyobj['ml']*10)/10;
+      
+                }
       dailyMap.set(date, dailyobj);
       
-      });
+      
+    });
       return dailyMap;
       
-    }  
+    
+  }  
     
 
     
@@ -144,9 +157,13 @@ function getDetail(dayMap: any){
       detobj['weather'] = ent.weather.map((x: any) => [x.id, x.icon]);
     
       detobj['temp'] = Math.round(Number(ent.main.temp - 273.15)); 
-      detobj['pop'] = ent.pop*100;
+      detobj['pop'] = Math.round(ent.pop*10)*10;
+  
       if(ent.rain){
-       detobj['ml'] = (ent.rain['3h']/3*1000).toPrecision(2);
+        detobj['ml'] = (ent['rain']['3h']/3) >= 1 ? Math.round(ent['rain']['3h']/3): Math.round(ent['rain']['3h']/3*10)/10;
+      }
+      if (ent.snow){
+       detobj['ml'] = (ent['snow']['3h']/3) >= 1 ? Math.round(ent['snow']['3h']/3): Math.round(ent['snow']['3h']/3*10)/10;
       }
       detobj['humidity'] = ent.main.humidity;
       detobj['ws'] = ent.wind.speed;

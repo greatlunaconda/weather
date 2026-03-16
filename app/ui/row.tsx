@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useLanguage } from '../lib/language-context';
+import { Children, useState } from 'react';
+import { useLanguage } from '../contexts/language-context';
 import {WeatherArray, Icons} from '../lib/description';
 
 interface WeatherData {
@@ -13,11 +13,36 @@ interface WeatherData {
 interface WeatherTableProps {
   location: string;
   data: WeatherData[];
+}
+
+interface DailyWeatherItem {
+  weather: number[];
+  temp?: number;
+  min?: number;
+  max?: number;
+  pop?: number;
+  ml?: number;
+}
+
+interface DetailWeatherItem {
+  time: string;
+  weather: number[];
+  temp: number;
+  pop?: number;
+  ml?: number;
+  humidity: number;
+  ws: number;
+  wd: string;
+}
+
+interface Weather {
+  daily: Map<string, DailyWeatherItem>;
+  detail: Map<string, DetailWeatherItem[]>;
 } 
 
 // Helper functions
-const getUniqueIcons = (weatherData: any) => {
-  const icons = weatherData.map((x: any) => WeatherArray.find((y: any) => y[0] == x)[3]);
+const getUniqueIcons = (weatherData:number[]) => {
+  const icons = weatherData.map((x ) => WeatherArray.find((y) => y[0] == x)[3]);
   return icons.filter((x: any, i: number) => icons.findIndex((y: any) => x == y) == i);
 };
 
@@ -52,12 +77,73 @@ const WeatherCell = ({ icons, date }: { icons: any; date: any }) => {
   );
 };
 
-export default function Row({ name, weather }: { name: string; weather: any }) {
+/*
+import React, { Children, isValidElement, cloneElement } from 'react';
+
+const ClassModifier = ({ children }) => {
+  return (
+    <>
+      {Children.map(children, (child) => {
+        // 1. React要素（タグ）であるか確認
+        if (!isValidElement(child)) return child;
+
+        // 2. 既存のクラス名を取得 (未定義なら空文字)
+        const originalClass = child.props.className || "";
+
+        // 3. クラスの追加・削除ロジック
+        let newClass = originalClass;
+
+        if (originalClass.includes("target")) {
+          // 例：'target' を削除して 'active' を追加
+          newClass = originalClass.replace("target", "").trim() + " active";
+        } else {
+          // 例：単純に 'new-item' クラスを追加
+          newClass = `${originalClass} new-item`.trim();
+        }
+
+        // 4. 新しいクラス名を注入してクローンを作成
+        return cloneElement(child, {
+          className: newClass,
+        });
+      })}
+    </>
+  );
+};
+
+// 使い方
+export default function App() {
+  return (
+    <ClassModifier>
+      <div className="target">ターゲット（activeに変わる）</div>
+      <p className="foo">普通の要素（new-itemが付く）</p>
+      テキストノード（無視される）
+    </ClassModifier>
+  );
+}
+
+
+const HoverDrscription =  ({ children }) => {
+return (
+  <span className="anchor-name-[detail] relative"relative">
+    {children}
+
+     ホバー時に表示されるテキスト *
+    <span className="invisible group-hover:visible absolute bottom-full mb-2 p-2 bg-black text-white text-xs rounded shadow-lg whitespace-nowrap">   
+      {htext}
+    </span>
+  </span>
+);
+}
+*/
+
+export default function Row({ name, weather }: { name: string; weather: Weather }) {
     const [showDetail, setShowDetail] = useState("");
     const { t } = useLanguage();
     const daily = weather.daily;
     const detail = weather.detail;
-    
+     
+    console.log("name = " + name);
+    console.log(weather) ; 
     // Convert Map to array of [key, value] pairs
     const dailyEntries = Array.from(daily.entries());
     
@@ -93,7 +179,11 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
                 <td className="border px-4 py-2 text-left w-[20%]">{t('temp')}</td>
                 {dailyEntries.map(([date, item]) => (
                   <td key={`temp-${date}`} className="border px-4 py-2 w-[15%]">
-                    {item.min ? `${item.min}-${item.max}` : `${item.temp}`}
+                    {item.temp == undefined ? (
+                      <><span className='bg-blue-200 px-2'>{item.min}</span><span className='bg-red-200 px-2'>{item.max}</span></>
+                    ) : (
+                      <span className='bg-green-200'>{item.temp}</span>
+                    )}
                   </td>
                 ))}
               </tr>
@@ -101,7 +191,8 @@ export default function Row({ name, weather }: { name: string; weather: any }) {
                 <td className="border px-4 py-2 text-left w-[20%]">{t('pop')}</td>
                 {dailyEntries.map(([date, item]) => (
                   <td key={`pop-${date}`} className="border px-4 py-2 w-[15%]">
-                    {item.pop ? `${item.pop} ml` : t('noPrecipitation')}
+                    {item.pop  ?  (<span className='text-blue-500'>{item.pop}%   {item.ml &&  `${item.ml}ml` }  </span>) 
+                    : (<span className='text-green-500'>_</span>)}
                   </td>
                 ))}
               </tr>
@@ -173,7 +264,9 @@ const DetailTable = ({ datedetail }: { datedetail: any[] }) => {
               <td className="border px-4 py-2 text-left w-[20%]">pop</td>
               {datedetail.map((item: any) => (
                 <td key={`pop-${item.time}`} className="border px-4 py-2 w-[10%]">
-                  {item.pop ? `${item.pop} % ${item.ml} ml` : 'noPrecipitation'}
+                  {item.pop ? (<span className='text-blue-500'>{item.pop} %  {item.ml >0 && `${item.ml}ml`} </span>)
+                    : (<span className='text-green-500'>_</span>)}
+
                 </td>
               ))}
             </tr>
@@ -191,7 +284,7 @@ const DetailTable = ({ datedetail }: { datedetail: any[] }) => {
                 <td key={`wind-${item.time}`} className="border px-4 py-2 w-[10%]">
                   {item.ws} m/s {item.wd}
                 </td>
-              ))}}
+              ))}
             </tr>
           </tbody>
         </table>

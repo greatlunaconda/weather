@@ -1,4 +1,4 @@
-export const WeatherArray = [
+export const WeatherArray:[string, string, string, string][] = [
   ["200", "Thunderstorm", "thunderstorm with light rain", "11d"],
   ["201", "Thunderstorm", "thunderstorm with rain", "11d"],
   ["202", "Thunderstorm", "thunderstorm with heavy rain", "11d"],
@@ -55,7 +55,7 @@ export const WeatherArray = [
   ["803", "Clouds", "broken clouds: 51-84%", "04d"],
   ["804", "Clouds", "overcast clouds: 85-100%", "04d"]
 ]
-export const Icons = {
+export const Icons:{[ikey:string]: string} = {
 "11d" : "/images/11d_t.png", 
 "09d" : "/images/09d_t.png", 
 "10d" : "/images/10d_t.png",

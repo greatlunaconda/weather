@@ -16,24 +16,22 @@ describe('fetchWeather', () => {
     const result = await  fetchWeather(190, 190, '/api/mock-test');
     expect((result.daily).get('8/10 Sun')).toEqual({
     "weather": [
-        "10d",
-        "04n"
+        500,
+        804
     ],
     "temp": 26,
-    "pop": 0.2,
-    "ml": 0.14
+    "pop": 20,
+    "ml": 0.1
 });
     expect(result.daily.size).toBe(6);
 
     expect(result.detail.get('8/10 Sun').at(2)).toEqual( {
     "time": 21,
-    "weather1": [
-        {
-            "id": 804,
-            "main": "Clouds",
-            "description": "overcast clouds",
-            "icon": "04n"
-        }
+    "weather": [
+        [
+            804,
+           "04n"
+        ]
     ],
     "weather2": [],
     "temp": 26,
