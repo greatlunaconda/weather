@@ -104,7 +104,8 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
         // Handle map clicks
         map.on('click', async (e: any) => {
           const { lat, lng } = e.latlng;
-          setCoordinates({ lat, lng });
+          const  newcoordinate = { lat, lng };
+          setCoordinates(newcoordinate);
           
           // Remove existing marker
           if (markerRef.current) {
@@ -115,7 +116,7 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
           markerRef.current = L.marker([lat, lng]).addTo(map);
           
           // Get place name using Nominatim (OpenStreetMap's geocoding service)
-          coordinates && setPlaceName(await getPlaceName(coordinates));
+          newcoordinate && setPlaceName(await getPlaceName(newcoordinate));
           
         });
       }
@@ -131,6 +132,12 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
    } , [] );
 
     return (
+      <>
+     <link
+        rel="stylesheet"
+        href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+        precedence="default" 
+      /> 
     <div className="w-full max-w-2xl mx-auto p-4">
       <div className="mb-4">
         <input
@@ -164,6 +171,6 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
         Add Place
       </button>
     </div>
-  
+</>  
   );
 }

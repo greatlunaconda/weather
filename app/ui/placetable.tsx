@@ -63,7 +63,7 @@ const reducer = (state: State, action: Action): State => {
     case 'ADD_PLACE':
       return {
         ...state,
-        places: [action.payload, ...state.places],
+        current: [action.payload, ...state.places ],
         cansave: true
       };
     case 'CANCEL':
@@ -168,7 +168,7 @@ export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], sa
         </tr>
       </thead>
       <tbody>
-        {  state.places.map((place, index) =>  
+        {  state.current.map((place, index) =>  
         (
           <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">

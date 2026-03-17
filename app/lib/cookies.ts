@@ -8,7 +8,7 @@ export interface PlaceData {
   lon: number;
 }
 
-export async function savePlacesToCookie(places: PlaceData[]): Promise<void> {
+export async function savePlacesToCookie(places: PlaceData[] | null): Promise<void> {
   await cookies().set('places', JSON.stringify(places), {
     path: '/',
     maxAge: 31536000

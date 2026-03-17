@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getPlacesFromCookie, savePlacesToCookiem, PlaceData } from "../lib/cookies"
+import { getPlacesFromCookie, savePlacesToCookie, PlaceData } from "../lib/cookies"
 //import PlaceSelector from "../ui/place-selector";
 import PlaceTable from "../ui/placetable";
 import LeafletPlaceSelector from "../ui/leaflet-place-selector";
@@ -24,7 +24,7 @@ export default async function selectPlace() {
       < Showcurrent />
     </div>
     <div>
-       < PlaceTable   places={currentplaces} savePlaces={savePlacesToCookiem} /> 
+       < PlaceTable   places={currentplaces} savePlaces={savePlacesToCookie} /> 
  ,    </div>
     </>
  )
