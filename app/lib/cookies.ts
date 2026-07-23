@@ -4,8 +4,8 @@ import { cookies } from 'next/headers';
 
 export interface PlaceData {
   name: string;
-  lat: number;
-  lon: number;
+  lat: string;
+  lon: string;
 }
 
 export async function savePlacesToCookie(places: PlaceData[] | null): Promise<void> {

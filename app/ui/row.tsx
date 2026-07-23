@@ -1,8 +1,12 @@
 'use client';
 
 import { Children, useState } from 'react';
-import { useLanguage } from '../contexts/language-context';
+import { WeatherResult, Detail, Daily } from '../lib/data';
+//import { useLanguage } from '../contexts/language-context';
 import {WeatherArray, Icons} from '../lib/description';
+
+
+//const {language, t} = useLanguage();
 
 interface WeatherData {
   date: string;
@@ -16,7 +20,7 @@ interface WeatherTableProps {
 }
 
 interface DailyWeatherItem {
-  weather: number[];
+  weather: string[];
   temp?: number;
   min?: number;
   max?: number;
@@ -26,36 +30,27 @@ interface DailyWeatherItem {
 
 interface DetailWeatherItem {
   time: string;
-  weather: number[];
+  weather: {id: string; icon: string}[];
   temp: number;
   pop?: number;
   ml?: number;
   humidity: number;
   ws: number;
-  wd: string;
+  wd: number;
 }
 
-interface Weather {
-  daily: Map<string, DailyWeatherItem>;
-  detail: Map<string, DetailWeatherItem[]>;
-} 
+  
+const hovername = "absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all";
+
+const noperception ='<span absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all> </span>';
 
 // Helper functions
-const getUniqueIcons = (weatherData:number[]) => {
-  const icons = weatherData.map((x ) => WeatherArray.find((y) => y[0] == x)[3]);
-  return icons.filter((x: any, i: number) => icons.findIndex((y: any) => x == y) == i);
-};
 
-const renderWeatherIcons = (icons: any) => {
-  return icons.map((icon: any, i: number) => (
-    <img key={`img-${i}`} className="w-6 h-6 inline-block" src={Icons[icon]} />
-  ));
-};
 
-const DayHeader = ({ date, isSelected, onClick }: { date: any; isSelected: boolean; onClick: (date: any) => void }) => (
+const DayHeader = ({ date, isSelected, onClick }: { date: string; isSelected: boolean; onClick: (date: string) => void }) => (
   <th 
     key={date} 
-    className={`border px-4 py-2 w-[15%] cursor-pointer ${
+    className={`border px-4 py-2 w-[13%] cursor-pointer ${
       isSelected ? 'bg-green-200' : ''
     }`} 
     onClick={() => onClick(date)}
@@ -64,81 +59,93 @@ const DayHeader = ({ date, isSelected, onClick }: { date: any; isSelected: boole
   </th>
 );
 
-const WeatherCell = ({ icons, date }: { icons: any; date: any }) => {
-  const hasFog = icons.includes('50d');
+/*
+const getUniqueIcons = (weatherData:number[]) => {
+  const icons = weatherData.map((x ) => WeatherArray.find((y) => y[0] == x)[1]); 
+  const iconset =  icons.filter((x: any, i: number) => icons.findIndex((y: any) => x == y) == i);
+  const ids = iconset.map(x => icons.flatMap((y, i) => y == x ? weatherData[i] : []) );
+  const idsset = ids.map(x => x.filter( (y, i) => x.findIndex(z => z == y ) != i ));
+  return {"icons": iconset, "ids": idsset };
+};*/
+
+
+const WeatherCell = ({date, weather}: {date:string, weather:string[]}) => {
+ 
+  const uid = weather.filter((x, i) => weather.findIndex(y => x == y) == i);
+  const icons:string[][] = [];
+  uid.forEach ((id:string, num:number) => {   
+     let ar = WeatherArray.find(a => a[0] == id);
+     if(ar){
+       let icon = ar[1];
+       let ind = icons.findIndex( x => x[0] == icon);
+       if(ind != -1){
+        icons[ind].push(id);
+       } else {
+        icons.push([icon, id]);
+       }
+     } else { 
+     
+     }
+    }); 
+  icons.forEach((x, ind) => {
+    if(x[0] == '50d'){
+      icons.push(icons.splice(ind, 1)[0]);
+    }
+  });
+    
   return (
-    <td key={`weather-${date}`} className="border px-4 py-2 w-[15%]">
-      <div className={`flex items-center justify-center gap-1 ${
-        hasFog ? 'flex-col' : 'flex-row'
-      }`}>
-        {renderWeatherIcons(icons)}
+    <td key={`weather-${date}`} className="border px-4 py-2 w-[13%]">
+      <div  className={`flex items-center justify-center gap-1`}>
+    {icons.map((icon: string[], i: number) => (
+    <>
+    <img key={`img-${i}`} className="w-6 h-6 inline-block relative" src={Icons[icon[0]]} />
+{/*    <span className="absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all"> 
+     
+    </span> */}
+    </>
+  )) }
+
       </div>
     </td>
-  );
+  )
 };
 
-/*
-import React, { Children, isValidElement, cloneElement } from 'react';
-
-const ClassModifier = ({ children }) => {
-  return (
+function Temps ({dailyent}:{dailyent:[string, Daily][]}){
+  return ( 
     <>
-      {Children.map(children, (child) => {
-        // 1. React要素（タグ）であるか確認
-        if (!isValidElement(child)) return child;
+      {dailyent.map(([date, item]:[string, Daily]) => (
+                  <td key={`temp-${date}`} className="border px-4 py-2 w-[13%]">
+                    {item.temp == undefined ? (
+                     <><span className='bg-blue-200 px-2'>{item.min}</span><span className='bg-red-200 px-2'>{item.max}</span></>
+                    ) : (
+                      <span className='bg-green-200'>{item.temp}</span>
+                    )}
+                  </td>
+                ))}
+   </>
+)
+}
 
-        // 2. 既存のクラス名を取得 (未定義なら空文字)
-        const originalClass = child.props.className || "";
-
-        // 3. クラスの追加・削除ロジック
-        let newClass = originalClass;
-
-        if (originalClass.includes("target")) {
-          // 例：'target' を削除して 'active' を追加
-          newClass = originalClass.replace("target", "").trim() + " active";
-        } else {
-          // 例：単純に 'new-item' クラスを追加
-          newClass = `${originalClass} new-item`.trim();
-        }
-
-        // 4. 新しいクラス名を注入してクローンを作成
-        return cloneElement(child, {
-          className: newClass,
-        });
-      })}
+function Popml ({dailyent}: {dailyent:[string, Daily][]}): React.JSX.Element{ 
+  const mljsx  = (item: Daily) =>  
+      item.ml != 0 ? (<span className='text-blue-500'>{`${item.pop}%    ${item.ml}ml`}  </span>) 
+                    : (<span className='text-green-500 relative group'>_</span>)
+  
+  return ( 
+    <>
+    {dailyent.map(([date, item]) => (
+                  <td key={`pop-${date}`} className="border px-4 py-2 w-[13%]">
+                      {mljsx(item)}                                             
+                  </td>) ) 
+    }
     </>
-  );
-};
-
-// 使い方
-export default function App() {
-  return (
-    <ClassModifier>
-      <div className="target">ターゲット（activeに変わる）</div>
-      <p className="foo">普通の要素（new-itemが付く）</p>
-      テキストノード（無視される）
-    </ClassModifier>
-  );
-}
+    )
+  }
 
 
-const HoverDrscription =  ({ children }) => {
-return (
-  <span className="anchor-name-[detail] relative"relative">
-    {children}
-
-     ホバー時に表示されるテキスト *
-    <span className="invisible group-hover:visible absolute bottom-full mb-2 p-2 bg-black text-white text-xs rounded shadow-lg whitespace-nowrap">   
-      {htext}
-    </span>
-  </span>
-);
-}
-*/
-
-export default function Row({ name, weather }: { name: string; weather: Weather }) {
+export default function Row({ name, weather }: { name: string; weather: WeatherResult }) {
     const [showDetail, setShowDetail] = useState("");
-    const { t } = useLanguage();
+    console.log(weather);
     const daily = weather.daily;
     const detail = weather.detail;
      
@@ -147,16 +154,21 @@ export default function Row({ name, weather }: { name: string; weather: Weather 
     // Convert Map to array of [key, value] pairs
     const dailyEntries = Array.from(daily.entries());
     
-    const showDetailOn = (date: any) => setShowDetail(date);
+    const showDetailOn = (date: string) =>  setShowDetail(date);
+     
+    const showdetailObj = (showDetail && detail.get(showDetail)) ?
+     detail.get(showDetail) : undefined;
+     
     const hideDetail = () => setShowDetail("");
 
     return (
       <div className={`${showDetail ? "anchor-name-[detail] relative" : ""} p-6`}>
-        <div className="overflow-x-auto">
+        <div className="">
           <table className="min-w-full border border-gray-300 text-center h-[120px]">
+    
             <thead>
               <tr className="bg-gray-100 h-[25px]">
-                <th className="border px-4 py-2 text-left w-[20%]">{t('days')}</th>
+                <th className="border px-4 py-2 text-left w-[13%]">{('days')}</th>
                 {dailyEntries.map(([date, _]) => (
                   <DayHeader 
                     key={date}
@@ -164,44 +176,32 @@ export default function Row({ name, weather }: { name: string; weather: Weather 
                     isSelected={showDetail == date} 
                     onClick={showDetailOn} 
                   />
-                ))}
+                ))}                
+            
               </tr>
             </thead>
             <tbody>
               <tr className="h-[35px]">
-                <td className="border px-4 py-2 text-left w-[20%]">{name}</td>
-                {dailyEntries.map(([date, item]) => {
-                  const icons = getUniqueIcons(item.weather);
-                  return <WeatherCell key={date} icons={icons} date={date} />;
-                })}
+                <td className="relative w-[13%] h-16"><div className={hovername}> {name}</div></td>
+                {dailyEntries.map(([date, item]) => 
+                   <WeatherCell key={date}  date={date} weather={item.weather} />
+                ) }
+
               </tr>
               <tr className="h-[30px]">
-                <td className="border px-4 py-2 text-left w-[20%]">{t('temp')}</td>
-                {dailyEntries.map(([date, item]) => (
-                  <td key={`temp-${date}`} className="border px-4 py-2 w-[15%]">
-                    {item.temp == undefined ? (
-                      <><span className='bg-blue-200 px-2'>{item.min}</span><span className='bg-red-200 px-2'>{item.max}</span></>
-                    ) : (
-                      <span className='bg-green-200'>{item.temp}</span>
-                    )}
-                  </td>
-                ))}
+                <td className="border px-4 py-2 text-left w-[13%]">{('temp')}</td>
+                <Temps dailyent={dailyEntries} />  
               </tr>
               <tr className="h-[30px]">
-                <td className="border px-4 py-2 text-left w-[20%]">{t('pop')}</td>
-                {dailyEntries.map(([date, item]) => (
-                  <td key={`pop-${date}`} className="border px-4 py-2 w-[15%]">
-                    {item.pop  ?  (<span className='text-blue-500'>{item.pop}%   {item.ml &&  `${item.ml}ml` }  </span>) 
-                    : (<span className='text-green-500'>_</span>)}
-                  </td>
-                ))}
+                <td className="border px-4 py-2 text-left w-[13%]">{('pop')}</td>
+                <Popml dailyent={dailyEntries} />
               </tr>
             </tbody>
           </table>
         </div>
-        {showDetail && (
+        {showDetail &&  showdetailObj && (
           <div>
-            <DetailTable datedetail={detail.get(showDetail)} />
+            <DetailTable detail={showdetailObj} />
             <button 
               className="[anchor-[detail] top-[50px] left-[5px] absolute z-101" 
               onClick={hideDetail}
@@ -211,77 +211,86 @@ export default function Row({ name, weather }: { name: string; weather: Weather 
           </div>
         )}
       </div>
-    );
+    ); 
 };
 
-const DetailTable = ({ datedetail }: { datedetail: any[] }) => {
-  const sortWeatherIcons = (weather: any) => {
-    const sorted: any[] = [];
-    weather.forEach((w: any) => 
-      w[1] === '50d' ? sorted.push(w) : sorted.unshift(w)
+ 
+
+const DetailTable = ({ detail }: { detail: Detail[] }) => {
+  console.log(detail);
+
+  const popml = (item: Detail): React.JSX.Element => {
+    const elem = item.ml !=0 ? (<span className='text-blue-500'>{item.pop} %  `${item.ml}ml` </span>)
+    :  (<span className='text-green-500 relative group'>_<span className="">No perception</span></span>);
+
+   return  (
+   <td key={`pop-${item.time}`} className="border px-4 py-2 w-[8%]">
+    {elem}
+    </td>
     );
-    return sorted;
   };
 
-  const renderWeatherIcons = (weather: any) => (
-    sortWeatherIcons(weather).map((w: any, i: number) => (
-      <img key={`img-${i}`} className="icon" src={Icons[w[1]]} />
-    ))
-  );
-
+  const sortedWeatherIcons = (item: Detail): React.JSX.Element => {
+    const   sorted: {id: string, icon: string}[]  = [];
+    item.weather.forEach((w) => 
+      w.icon === '50d' ? sorted.push(w) : sorted.unshift(w)
+    );
+    return (
+      <td key={`weather-${item.time}`} className="border px-4 py-2 w-[8%]">
+          {sorted.map((w: {id:string, icon:string}, i: number) => (
+       <>
+      <img key={`img-${i}`} className="icon relative" src={Icons[w.icon]} />
+      <span  className='absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all'> </span>
+      </>
+          )) }
+      </td>
+    )
+  };
+  
   return (
-    <div className="anchor-[detail] top-[55px] right-[0px] absolute z-100 w-full bg-white shadow-lg px-6">
+    <div className="anchor-[detail] top-[59px] right-[0px] absolute z-100 w-full bg-white shadow-lg px-6">
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 text-center h-[120px]">
           <thead>
-            <tr className="bg-gray-100 h-[25px]">
-              <th className="border px-4 py-2 text-left w-[20%]">Hour</th>
-              {datedetail.map((item: any) => (
-                <th key={item.time} className="border px-4 py-2 w-[10%]">
+            <tr  key="time" className="bg-gray-100 h-[25px]">
+              <th  key="time" className="border px-4 py-2 text-left w-[8%]">Hour</th>
+              {detail.map((item: Detail) => (
+                <th key={item.time} className="border px-4 py-2 w-[8%]">
                   {item.time}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            <tr className="h-[35px]">
-              <td className="border px-4 py-2 text-left w-[20%]">weather</td>
-              {datedetail.map((item: any) => (
-                <td key={`weather-${item.time}`} className="border px-4 py-2 w-[10%]">
-                  {renderWeatherIcons(item.weather)}
-                </td>
-              ))}
-            </tr>
-            <tr className="h-[30px]">
-              <td className="border px-4 py-2 text-left w-[20%]">temp</td>
-              {datedetail.map((item: any) => (
-                <td key={`temp-${item.time}`} className="border px-4 py-2 w-[10%]">
+            <tr  key="weather" className="h-[35px]">
+              <td key="weather" className="border px-4 py-2 text-left w-[8%]">weather</td>
+                {detail.map((item: Detail) => sortedWeatherIcons(item))}
+             </tr>
+             <tr key="temp" className="h-[30px]">
+               <td  key="temp" className="border px-4 py-2 text-left w-[8%]">temp</td>
+               {detail.map((item: Detail) => (
+               <td key={`temp-${item.time}`} className="border px-4 py-2 w-[8%]">
                   {item.temp}
-                </td>
+               </td>
               ))}
             </tr>
-            <tr className="h-[30px]">
-              <td className="border px-4 py-2 text-left w-[20%]">pop</td>
-              {datedetail.map((item: any) => (
-                <td key={`pop-${item.time}`} className="border px-4 py-2 w-[10%]">
-                  {item.pop ? (<span className='text-blue-500'>{item.pop} %  {item.ml >0 && `${item.ml}ml`} </span>)
-                    : (<span className='text-green-500'>_</span>)}
-
-                </td>
-              ))}
+            <tr key="popml" className="h-[30px]">
+              <td key="popml" className="border px-4 py-2 text-left w-[8%]">pop</td>
+              {detail.map((item: Detail) => popml(item)) }
+                                              
             </tr>
-            <tr className="h-[30px]">
-              <td className="border px-4 py-2 text-left w-[20%]">humidity</td>
-              {datedetail.map((item: any) => (
-                <td key={`hum-${item.time}`} className="border px-4 py-2 w-[10%]">
+            <tr key="humidity" className="h-[30px]">
+              <td key="humidity"  className="border px-4 py-2 text-left w-[8%]">humidity</td>
+              {detail.map((item: Detail) => (
+                <td key={`hum-${item.time}`} className="border px-4 py-2 w-[8%]">
                   {item.humidity}%
                 </td>
               ))}
             </tr>
-            <tr className="h-[30px]">
-              <td className="border px-4 py-2 text-left w-[20%]">wind</td>
-              {datedetail.map((item: any) => (
-                <td key={`wind-${item.time}`} className="border px-4 py-2 w-[10%]">
+            <tr key="wind" className="h-[30px]">
+              <td key="wind" className="border px-4 py-2 text-left w-[8%]">wind</td>
+              {detail.map((item: Detail) => (
+                <td key={`wind-${item.time}`} className="border px-4 py-2 w-[8%]">
                   {item.ws} m/s {item.wd}
                 </td>
               ))}
@@ -290,5 +299,5 @@ const DetailTable = ({ datedetail }: { datedetail: any[] }) => {
         </table>
       </div>
     </div>
-  );
+  ); 
 };

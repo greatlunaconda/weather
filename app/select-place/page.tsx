@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { getPlacesFromCookie, savePlacesToCookie, PlaceData } from "../lib/cookies"
 //import PlaceSelector from "../ui/place-selector";
 import PlaceTable from "../ui/placetable";

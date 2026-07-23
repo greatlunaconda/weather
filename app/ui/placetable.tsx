@@ -57,19 +57,19 @@ const reducer = (state: State, action: Action): State => {
     case 'DELETE_PLACE':
       return {
         ...state,
-        places: state.places.filter(p => p.name !== action.payload.name),
+        current: state.current.filter(p => p.name !== action.payload.name),
         cansave: true
       };
     case 'ADD_PLACE':
       return {
         ...state,
-        current: [action.payload, ...state.places ],
+        current: [action.payload, ...state.current ],
         cansave: true
       };
     case 'CANCEL':
       return {
         ...state,
-        places: state.current || [],
+        current: state.places,
         cansave: false
       };
     default:

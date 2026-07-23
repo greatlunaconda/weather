@@ -203,3 +203,10 @@ const config = {
 };
 
 module.exports = createJestConfig(config)
+
+const customJestConfig = {
+  // サーバーコンポーネント用に環境を node に指定
+  testEnvironment: 'node',
+}
+
+module.exports = createJestConfig(customJestConfig)

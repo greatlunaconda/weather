@@ -24,7 +24,7 @@ const translations = {
     selectPlace: 'Select Place',
     language: 'Language',
     aboutUs: 'About us',
-    noPrecipitation: 'No precipitation'
+    _: 'No precipitation'
   },
   japanese: {
     days: '日',
@@ -37,7 +37,7 @@ const translations = {
     selectPlace: '場所選択',
     language: '言語',
     aboutUs: '私たちについて',
-    noPrecipitation: '降水なし'
+    _: '降水なし'
   },
   chinese: {
     days: '日期',
@@ -50,7 +50,7 @@ const translations = {
     selectPlace: '选择地点',
     language: '语言',
     aboutUs: '关于我们',
-    noPrecipitation: '无降水'
+    _: '无降水'
   },
   russian: {
     days: 'Дни',
@@ -63,7 +63,7 @@ const translations = {
     selectPlace: 'Выбрать место',
     language: 'Язык',
     aboutUs: 'О нас',
-    noPrecipitation: 'Без осадков'
+    _: 'Без осадков'
   },
   spanish: {
     days: 'Días',
@@ -76,7 +76,7 @@ const translations = {
     selectPlace: 'Seleccionar lugar',
     language: 'Idioma',
     aboutUs: 'Acerca de nosotros',
-    noPrecipitation: 'Sin precipitación'
+    _: 'Sin precipitación'
   },
   french: {
     days: 'Jours',
@@ -89,7 +89,7 @@ const translations = {
     selectPlace: 'Sélectionner un lieu',
     language: 'Langue',
     aboutUs: 'À propos de nous',
-    noPrecipitation: 'Pas de précipitations'
+    _: 'Pas de précipitations'
   },
   arabic: {
     days: 'الأيام',
@@ -102,7 +102,7 @@ const translations = {
     selectPlace: 'اختيار المكان',
     language: 'اللغة',
     aboutUs: 'معلومات عنا',
-    noPrecipitation: 'لا توجد أمطار'
+    _: 'لا توجد أمطار'
   }
 };
 
@@ -134,4 +134,4 @@ export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) throw new Error('useLanguage must be used within LanguageProvider');
   return context;
-};
+};;

@@ -1,53 +1,52 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { fetchWeather } from "../lib/data";
+import { fetchWeather, WeatherResult, isWeatherJson } from "../lib/data";
 import Row from "./row";
 import{useRef} from 'react';
 
-export function Currentrow({num}:{num:Number}){
-const [place, setPlace] = useState({lat:190, lng:190});
+function getGeoLocation(): Promise<{lat:string, lon:string}>{
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition( 
+      pos => {   
+        const  newPlace:{lat:string, lon:string} = {lat:String(pos.coords.latitude), lon: String(pos.coords.longitude)};
+        resolve(newPlace); 
+      } 
+    ,error => {throw error;  reject(error)})
+  })
+} 
+
+export function Currentrow(){
+const [place, setPlace] = useState({lat:"", lon:""});
 const [name, setName] = useState("");  
-const [weather, setWeather] = useState<any>(null);
-const [showcurrent, setShowCurrent] = useState(num == 0);
-const [loading, setLoading] = useState(false);
+const [weather, setWeather] = useState<WeatherResult>();
+const [showcurrent, setShowCurrent] = useState(true);
 
 console.log("Currentrow component mounted");
   useEffect(() => {
     if (showcurrent){
-    setLoading(true);
     console.log("useEffect started");
-    (async () => {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        console.log("geolocation success");
-        const newPlace = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-        setPlace(newPlace);
-        
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newPlace.lat}&lon=${newPlace.lng}&zoom=18&addressdetails=1`
-          );
-          const nameData = await response.json();
+      (async () => {
+        const newPlace = await getGeoLocation();
+      
+        const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newPlace.lat}&lon=${newPlace.lon}&zoom=18&addressdetails=1`
+        );
+        const nameData = await response.json();
           if (nameData.display_name) {
             setName(nameData.display_name);
-          }
-        } catch (error) {
-          console.error('Geocoding error:', error);
-        }
+        }        
         
-        const data = await fetchWeather(newPlace.lat, newPlace.lng, "")
-          .catch(err => console.error('Failed to fetch weather:', err));
+        const data = await fetchWeather(newPlace.lat,  newPlace.lon)
         if (data) {
           console.log("Weather data received");
           setWeather(data);
-          setLoading(false);
         }
-      }, (error) => console.log("Geolocation error:", error));
-    } 
-  )();
-  
+        
+      })();
+    }
   }
-}, []);
+      , []);
      console.log("useEffect end");
     return (
       <>
@@ -56,14 +55,13 @@ console.log("Currentrow component mounted");
         <button onClick={() => setShowCurrent(!false)}> Current Place </button> 
       </div>
       
-        {showcurrent && 
-        <div>
-         loading ?  <div>Loading  data....</div> :
+        {showcurrent && weather && 
+      <div>
         <Row name={name} weather={weather} />          
-         </div>
+      </div>
          }
       
-      </>
+       </>
     );
     }
 
