@@ -11,10 +11,10 @@ export interface LeafletSaveProps {
 preload('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', { as: 'style' });
 
 
-async function getPlaceName({lat, lng}:{ lat:number, lng:number} ){
+async function getPlaceName({lat, lon}:{ lat:number, lon:number} ){
     try {
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
               {
                 headers: {
                   'User-Agent': 'WeatherApp/1.0'
@@ -37,15 +37,15 @@ async function getPlaceName({lat, lng}:{ lat:number, lng:number} ){
               if (data.address.city) parts.push(data.address.city);
               if (data.address.state) parts.push(data.address.state);
               if (data.address.country) parts.push(data.address.country);
-              return parts.join(', ') || `Location ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+              return parts.join(', ') || `Location ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
             } else {
               // Fallback to coordinates
-              return `Location ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+              return `Location ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
             }
           } catch (error) {
             console.error('Geocoding error:', error);
             // Fallback to coordinates if geocoding fails
-            return `Location ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            return `Location ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
           }
   }
 
@@ -53,7 +53,7 @@ async function getPlaceName({lat, lng}:{ lat:number, lng:number} ){
 
 export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave: (placedata: PlaceData) => void;  currentPlaces : PlaceData[] | []; }) {
   const [placename, setPlaceName] = useState("");
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }|null>(null) ;
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number }|null>(null) ;
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -103,8 +103,8 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
 
         // Handle map clicks
         map.on('click', async (e: any) => {
-          const { lat, lng } = e.latlng;
-          const  newcoordinate = { lat, lng };
+          const { lat, lon } = e.latlon;
+          const  newcoordinate = { lat, lon };
           setCoordinates(newcoordinate);
           
           // Remove existing marker
@@ -113,7 +113,7 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
           }
           
           // Add new marker
-          markerRef.current = L.marker([lat, lng]).addTo(map);
+          markerRef.current = L.marker([lat, lon]).addTo(map);
           
           // Get place name using Nominatim (OpenStreetMap's geocoding service)
           newcoordinate && setPlaceName(await getPlaceName(newcoordinate));
@@ -127,6 +127,7 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
+        
       }
     };
    } , [] );
@@ -154,15 +155,15 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
       {coordinates && (
         <div className="mb-4 text-sm text-gray-600">
           <p>Latitude: {coordinates.lat.toFixed(6)}</p>
-          <p>Longitude: {coordinates.lng.toFixed(6)}</p>
+          <p>Longitude: {coordinates.lon.toFixed(6)}</p>
         </div>
       )}
       
       <button
         onClick={() => {
           if (coordinates && placename) {
-            console.log('Saving place:', { name: placename, lat: coordinates.lat, lon: coordinates.lng }); // Debug log
-            onsave({ name: placename, lat: coordinates.lat, lon: coordinates.lng } as PlaceData);
+            console.log('Saving place:', { name: placename, lat: coordinates.lat, lon: coordinates.lon }); // Debug log
+            onsave({ name: placename, lat: String(coordinates.lat), lon: String(coordinates.lon) } as PlaceData);
           }
         }}
         disabled={!placename || !coordinates}

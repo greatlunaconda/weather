@@ -40,9 +40,9 @@ interface DetailWeatherItem {
 }
 
   
-const hovername = "absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all";
+//const hovername = "absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all";
 
-const noperception ='<span absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all> </span>';
+//const noperception ='<span absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all> </span>';
 
 // Helper functions
 
@@ -99,9 +99,7 @@ const WeatherCell = ({date, weather}: {date:string, weather:string[]}) => {
     {icons.map((icon: string[], i: number) => (
     <>
     <img key={`img-${i}`} className="w-6 h-6 inline-block relative" src={Icons[icon[0]]} />
-{/*    <span className="absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all"> 
      
-    </span> */}
     </>
   )) }
 
@@ -109,6 +107,7 @@ const WeatherCell = ({date, weather}: {date:string, weather:string[]}) => {
     </td>
   )
 };
+// <span className="absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all"> </span> 
 
 function Temps ({dailyent}:{dailyent:[string, Daily][]}){
   return ( 
@@ -129,7 +128,7 @@ function Temps ({dailyent}:{dailyent:[string, Daily][]}){
 function Popml ({dailyent}: {dailyent:[string, Daily][]}): React.JSX.Element{ 
   const mljsx  = (item: Daily) =>  
       item.ml != 0 ? (<span className='text-blue-500'>{`${item.pop}%    ${item.ml}ml`}  </span>) 
-                    : (<span className='text-green-500 relative group'>_</span>)
+                    : (<span className='text-green-500  group'>_</span>)
   
   return ( 
     <>
@@ -162,13 +161,13 @@ export default function Row({ name, weather }: { name: string; weather: WeatherR
     const hideDetail = () => setShowDetail("");
 
     return (
-      <div className={`${showDetail ? "anchor-name-[detail] relative" : ""} p-6`}>
+      <div className={`${showDetail} ? "anchor-name-[detail] relative p-6" : "p-6"`}>
         <div className="">
           <table className="min-w-full border border-gray-300 text-center h-[120px]">
     
             <thead>
               <tr className="bg-gray-100 h-[25px]">
-                <th className="border px-4 py-2 text-left w-[13%]">{('days')}</th>
+                <th key="days" className="border px-4 py-2 text-left w-[13%]">{('days')}</th>
                 {dailyEntries.map(([date, _]) => (
                   <DayHeader 
                     key={date}
@@ -182,7 +181,7 @@ export default function Row({ name, weather }: { name: string; weather: WeatherR
             </thead>
             <tbody>
               <tr className="h-[35px]">
-                <td className="relative w-[13%] h-16"><div className={hovername}> {name}</div></td>
+                <td className="relative w-[13%] h-16"><div> {name}</div></td>
                 {dailyEntries.map(([date, item]) => 
                    <WeatherCell key={date}  date={date} weather={item.weather} />
                 ) }
@@ -240,7 +239,7 @@ const DetailTable = ({ detail }: { detail: Detail[] }) => {
           {sorted.map((w: {id:string, icon:string}, i: number) => (
        <>
       <img key={`img-${i}`} className="icon relative" src={Icons[w.icon]} />
-      <span  className='absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all'> </span>
+   {/*   <span  className='absolute inset-0 p-2 border bg-white line-clamp-2  hover:line-clamp-none hover:h-max hover:z-20 hover:shadow transition-all'> </span> */}
       </>
           )) }
       </td>
@@ -248,7 +247,7 @@ const DetailTable = ({ detail }: { detail: Detail[] }) => {
   };
   
   return (
-    <div className="anchor-[detail] top-[59px] right-[0px] absolute z-100 w-full bg-white shadow-lg px-6">
+    <div className="anchor-[detail] top-[59px] right-[0px] absolute z-100 bg-white w-full shadow-lg px-6">
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 text-center h-[120px]">
           <thead>
