@@ -1,6 +1,7 @@
 'use server'
 
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 export interface PlaceData {
   name: string;
@@ -33,7 +34,8 @@ export async function saveLanguage(language: Language) {
   await cookies().set('language', JSON.stringify(language), {
     path: '/',
     maxAge: 31536000
-});  
+}); 
+  revalidatePath('/');
 }
 
 export async function getLanguage(): Promise<Language> {

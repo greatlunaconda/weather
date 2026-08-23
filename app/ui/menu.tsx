@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useLanguage } from "../contexts/language-context";
+import { saveLanguage , Language} from "../lib/cookies";
+//import { useLanguage } from "../contexts/language-context";
 
 export default function Menu() {
   const [menu, setMenu] = useState(false);
   const [showLang, setShowLang] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
+  //const { language, setLanguage, t } = useLanguage();
   
   const showMenu = () => setMenu(true);
-  const languages = [
+  const languages: {code: Language, name: string}[] = [
     { code: 'english', name: 'English' },
     { code: 'japanese', name: '日本語' },
     { code: 'chinese', name: '中文' },
@@ -27,7 +28,7 @@ export default function Menu() {
         onClick={showMenu}
         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md font-medium"
       >
-        {t('menu')}
+        {('menu')}
       </button>
       </div>
       {menu && (
@@ -39,15 +40,19 @@ export default function Menu() {
                 href="/select-place"
                 className="block px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700 hover:text-blue-600"
               >
-                {t('selectPlace')}
+                {('selectPlace')}
               </Link>
             </div>
-            <div className="border-t border-gray-100">
+            <div className="border-t border-gray-100">Selective FakingSSelective Faking
+elective Faking
+
+Selective Faking
+
               <button 
                 onClick={() => setShowLang(!showLang)}
                 className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700 hover:text-blue-600 flex justify-between items-center"
               >
-                {t('language')}
+                {('language')}
                 <span className="text-sm">{showLang ? '▲' : '▼'}</span>
               </button>
               {showLang && (
@@ -55,7 +60,7 @@ export default function Menu() {
                   {languages.map(lang => (
                     <button 
                       key={lang.code} 
-                      onClick={() => {setLanguage(lang.code as any); setShowLang(false);}}
+                      onClick={() => {saveLanguage(lang.code); setShowLang(false);}}
                       className="w-full text-left px-6 py-2 hover:bg-blue-100 transition-colors text-sm text-gray-600 hover:text-blue-700"
                     >
                       {lang.name}
@@ -65,7 +70,7 @@ export default function Menu() {
               )}
             </div>
             <div className="border-t border-gray-100">
-              <p className="px-4 py-3 text-gray-700">{t('aboutUs')}</p>
+              <p className="px-4 py-3 text-gray-700">{('aboutUs')}</p>
             </div>
           </div>
         </>

@@ -1,4 +1,5 @@
-import { fetchWeather } from '../app/lib/data';
+import {DetailType, fetchWeather,  getDaily  } from '../app/lib/data';
+
 import  testdata from  './data/testweather.json';
 //import fs from 'fs';
 //import path from 'path';
@@ -14,27 +15,19 @@ import  testdata from  './data/testweather.json';
 //) as jest.Mock;
 
 describe('fetchWeather', () => {
-    it('It should return key of  dayly and  detail object', async () => {    
-      const result = await  fetchWeather('','',testdata);
-    expect(result).toBeDefined();
-    expect((result.daily).get('8/10 Sun')).toEqual({       
-    "weather": [
-        '500',
-        '804'
-    ],
-    "temp": 26,
-    "pop": 20,
-    "ml": 0.1
-});
+  let result:Map<string,DetailType[]>;
+    beforeAll(async () => {
+      result = await  fetchWeather('','', 'english', testdata);
+    } );
     
-    expect(result.daily.size).toBe(6);
-
-    expect(result.detail.get('8/10 Sun')).toBeDefined();
-    expect(result.detail.get('8/10 Sun')?.at(2)).toEqual( {
+    it('It should return key of  dayly and  detail object', async () => {    
+     expect(result).toBeDefined();
+     expect(result.get('8/10 Sun')?.at(2)).toEqual( {
     "time": 21,
     "weather": [{       
        id: '804', 
-       icon: '04n'
+       icon: '04n',
+       desc: 'overcast clouds'
     }],
     "temp": 26,
     "pop": 0, 
@@ -42,9 +35,25 @@ describe('fetchWeather', () => {
     "ws": 0.53,
     "wd": 5
 } );
-    expect((result.detail).get('8/10 Sun')?.length).toBe(3);
-    expect((result.detail).get('8/14 Thu')?.length).toBe(8);
-    expect((result.detail).get('8/15 Fri')?.length).toBe(5);
+    expect(result.get('8/10 Sun')?.length).toBe(3);
+    expect(result.get('8/14 Thu')?.length).toBe(8);
+    expect(result.get('8/15 Fri')?.length).toBe(5);
     
+    });  
+    it ('It suould return daily object', () => {
+       let daily = getDaily(result);
+    expect(daily.get('8/10 Sun'))?.toEqual({       
+    "weather": [
+        ['10d', 'light rain'],
+        ['04d',  'overcast clouds'] 
+    ],
+    "temp": 26,
+    "pop": 20,
+    "ml": 0
+    });
+    
+    expect(daily.size).toBe(6);
+
+    expect(daily.get('8/15 Fri')).toBeDefined();    
     });
 });

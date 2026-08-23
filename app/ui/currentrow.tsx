@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { fetchWeather, WeatherResult, isWeatherJson } from "../lib/data";
 import Row from "./row";
 import{useRef} from 'react';
+import { Language } from "../lib/cookies";
 
 function getGeoLocation(): Promise<{lat:string, lon:string}>{
   return new Promise((resolve, reject) => {
@@ -16,7 +17,7 @@ function getGeoLocation(): Promise<{lat:string, lon:string}>{
   })
 } 
 
-export function Currentrow(){
+export function Currentrow({lang}: {lang: Language  }){
 const [place, setPlace] = useState({lat:"", lon:""});
 const [name, setName] = useState("");  
 const [weather, setWeather] = useState<WeatherResult>();
@@ -37,7 +38,7 @@ console.log("Currentrow component mounted");
             setName(nameData.display_name);
         }        
         
-        const data = await fetchWeather(newPlace.lat,  newPlace.lon)
+        const data = await fetchWeather(newPlace.lat,  newPlace.lon, lang)
         if (data) {
           console.log("Weather data received");
           setWeather(data);
@@ -57,7 +58,7 @@ console.log("Currentrow component mounted");
       
         {showcurrent && weather && 
       <div>
-        <Row name={name} weather={weather} />          
+        <Row name={name} weather={weather} lang={lang} />          
       </div>
          }
       

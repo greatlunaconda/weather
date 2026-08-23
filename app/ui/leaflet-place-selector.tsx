@@ -3,10 +3,10 @@ import { preload } from 'react-dom';
 import { useState, useRef, useEffect } from 'react';
 import { PlaceData } from '../lib/cookies';
 
+
 export interface LeafletSaveProps {
   onsave: (placedata: PlaceData ) => void;
 }
-
 
 preload('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', { as: 'style' });
 
@@ -57,6 +57,14 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleToggle = () => {
+    const nextState = !isSaved;
+    setIsSaved(nextState);
+  };
+
+
 
 
 
@@ -149,7 +157,28 @@ export default function LeafletPlaceSelector({ onsave, currentPlaces }: { onsave
           className="w-full p-2 border border-gray-300 rounded"
         />
       </div>
-      
+      <div className="flex items-center gap-[12px]">
+        <button 
+        type="button"
+        role="switch"
+        aria-checked={isSaved}
+        className={`relative w-[85px] h-[28px] rounded-full border-none p-0 flex items-center cursor-pointer transition-colors duration-200 ${
+          isSaved ? 'bg-[#4cd964]' : 'bg-[#e4e4e7]'}` }
+        onClick={handleToggle}
+        >
+        {/* 💡 オフの時だけ右側に表示される「デフォルト」の文字 */}
+        {!isSaved && <span className="absolute right-[10px] text-[11px] font-medium text-[#71717a] select-none pointer-events-none">デフォルト</span>}
+
+        {/* 動く丸いツマミ */}
+          <span className={`absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.15)] transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            isSaved ? 'translate-x-[3px]' : 'translate-x-[60px]'}`}   />
+        </button>
+
+        <span className="text-[14px] font-bold">
+          {isSaved ? '地名を保存中' : '地名を保存する'}
+        </span>
+      </div>
+
       <div ref={mapRef} className="w-full h-96 border border-gray-300 rounded mb-4" />
       
       {coordinates && (
