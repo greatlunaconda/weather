@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useReducer } from "react";
-import { getPlacesFromCookie, PlaceData, savePlacesToCookie} from "../lib/cookies"
+import { getPlacesFromCookie, Language, PlaceData, savePlacesToCookie} from "../lib/cookies"
 import LeafletPlaceSelector from "./leaflet-place-selector";
 import { canvas } from "leaflet";
+import { LangProp } from "../page";
 
 type State = {
   current: PlaceData[] ;
@@ -77,7 +78,7 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], savePlaces: (newplaces:PlaceData[] | null) => void })
+export default function PlaceTable({places, onSave, lang}:{ places:PlaceData[], onSave: (newplaces:PlaceData[] | null) => void, lang:LangProp })
 
   {
   
@@ -117,15 +118,19 @@ export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], sa
   const toggleSelector = () => dispatch({ type: 'TOGGLE_SELECTOR' });
 
   const addPlace = (placedata:PlaceData):void  =>  {     
-    if (placedata.lat &&  placedata.lon &&  placedata.name) {
+    if (placedata.lat &&  placedata.lng &&  placedata.name) {
       dispatch({ type: 'ADD_PLACE', payload: placedata });
+      const nextcurrent = [placedata, ...state.current ];
+      onSave(nextcurrent);
+      dispatch({ type: 'SAVE_PLACES'});
+
       alert('Place saved successfully!');
     }
   };
 
-  const savePlalces = ()  => {
+  const savePlaces = ()  => {
     if(state.cansave){
-      savePlaces(state.current)  
+      onSave(state.current)  
       dispatch({ type: 'SAVE_PLACES'});
     }
   };
@@ -138,7 +143,7 @@ export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], sa
   return (
     <div>
       <div className="mb-4 space-x-2"> 
-        <button onClick={savePlalces} disabled={!state.cansave} className={state.cansave?"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded": "bg-blue-100 hover:bg-blue-100 text-white font-bold py-2 px-4 rounded"}>
+        <button onClick={savePlaces} disabled={!state.cansave} className={state.cansave?"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded": "bg-blue-100 hover:bg-blue-100 text-white font-bold py-2 px-4 rounded"}>
           Save
         </button>
         <button onClick={cancel} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
@@ -150,7 +155,7 @@ export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], sa
          <button onClick={() => toggleSelector()} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
            { state.selector ? "Close Map" : "Open Map" }
          </button> 
-    { state.selector && <LeafletPlaceSelector  onsave={ addPlace }  currentPlaces={state.places} /> }
+    { state.selector && <LeafletPlaceSelector  onsave={ addPlace }  currentPlaces={state.places} lang={lang} /> }
 
      </div>
     <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -178,7 +183,7 @@ export default function PlaceTable({places, savePlaces}:{ places:PlaceData[], sa
               {place.lat}
             </td>
             <td className="px-6 py-4">
-              {place.lon}
+              {place.lng}
             </td>
             <td className="px-6 py-4">
               <div>

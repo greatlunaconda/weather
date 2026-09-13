@@ -4,6 +4,7 @@ import { Language } from "./cookies";
 type WeatherJson = {
   city: {
     timezone: number | string;
+    name: string; 
   };
   list: WeatherType[];
 };
@@ -54,6 +55,7 @@ export function isWeatherJson(json: unknown): json is WeatherJson {
     json != null &&
     "city" in json &&
     "timezone" in (json as any).city &&
+    "name" in (json as any).city &&
     "list" in json &&
     Array.isArray((json as any).list) &&
     (json as any).list.filter((x: unknown) => isWeather(x)).length > 0
@@ -62,13 +64,13 @@ export function isWeatherJson(json: unknown): json is WeatherJson {
 //ja  en   zh_cn  ar  ru  es fr
 //onst url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&lang=ja&appid=${API_KEY}`;
 
-export async function fetchWeather(lat = '', lon = '', lang: Language = "english", data: unknown = ""): Promise<Map<string, DetailType[]>>  {
+export async function fetchWeather(lat = '', lon = '', lang: Language = "en", data: unknown = ""): Promise<{name:string, details:Map<string, DetailType[]>}>  {
   try {
     let json: unknown;
     if (lat != '' && lon != '') {
-      const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=dac6092827afc4e5557966b0e6b61c3f`;
+      const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=dac6092827afc4e5557966b0e6b61c3f&lang=${lang}`;
 
-      const res = await fetch(url)
+      const res = await fetch(url);
 
       if (res && !res?.ok) {
         throw new Error(`HTTP error! status: ${res?.status}`);
@@ -83,15 +85,16 @@ export async function fetchWeather(lat = '', lon = '', lang: Language = "english
       json = await res.json();
     } else { json = data; }
     if (isWeatherJson(json)) {
+      const name = json.city.name;
       const daymap = getDayMap(json);
       const detail = getDetail(daymap);
-      return detail;
+      return {name: name, details: detail};
     } else { throw new Error('Response Json is wrong'); }
   } catch (error) {
     throw error;
   }
 }
-
+//let dateStr = `${date.getMonth() + 1}/${date.getDate()} ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]}`;
 function getDayMap(weatherjson: WeatherJson): Map<string, WeatherType[]> {
   var dayMap = new Map();
   const tz = Number(weatherjson.city.timezone) / 60;
@@ -101,7 +104,7 @@ function getDayMap(weatherjson: WeatherJson): Map<string, WeatherType[]> {
     const tzo = date.getTimezoneOffset();
     date.setMinutes(tzo + tz);
     //  date.setHours(date.getHours() + 9); //C+9)
-    let dateStr = `${date.getMonth() + 1}/${date.getDate()} ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]}`;
+    let dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getDay()}`;
     let dateStrHour = date.getHours();
     entry.dt = dateStrHour;
     if (!dayMap.has(dateStr)) {
@@ -120,13 +123,13 @@ function getDetail(dayMap: Map<string, WeatherType[]>): Map<string, DetailType[]
     entry.forEach((ent: WeatherType) => {
       let ml:undefined | number;
       if (ent.rain) {
-        ml = (Number(ent['rain']['3h']) / 3) >= 1 ? Math.round(Number(ent['rain']['3h']) / 3) : Math.round(Number(ent['rain']['3h']) / 3 * 10) / 10;
+        ml = (Number(ent['rain']['3h']) / 3) >= 1 ? Math.round(Number(ent['rain']['3h']) / 3) : Number((Number(ent['rain']['3h']) / 3).toFixed(1));
       }
       if (ent.snow) {
         if(ent.rain && ml){
-          ml += (Number(ent['snow']['3h']) / 3) >= 1 ? Math.round(Number(ent['snow']['3h']) / 3) : Math.round(Number(ent['snow']['3h']) / 3 * 10) / 10;
+          ml += (Number(ent['snow']['3h']) / 3) >= 1 ? Math.round(Number(ent['snow']['3h']) / 3) : Number((Number(ent['snow']['3h']) / 3).toFixed(1));
         }
-        ml = (Number(ent['snow']['3h']) / 3) >= 1 ? Math.round(Number(ent['snow']['3h']) / 3) : Math.round(Number(ent['snow']['3h']) / 3 * 10) / 10;
+        ml = (Number(ent['snow']['3h']) / 3) >= 1 ? Math.round(Number(ent['snow']['3h']) / 3) : Number((Number(ent['snow']['3h']) / 3).toFixed(1));
       }
            
       let weather = ent.weather.map(x => ({ id: String(x.id), icon: x.icon, desc: x.description }));
@@ -224,10 +227,9 @@ export function getDaily(dailys:  Map<string, DetailType[]>): Map<string, DailyT
 
     dailyobj['pop'] = Math.max(...ent.map(e => e.pop));
     
-    let ml =  ent.reduce((a, e) => e.ml != null ? a + e.ml*3 : a, 0);
-    
+    let ml =  ent.reduce((a, e) => e.ml != null ? a + e.ml*3 : a, 0); 
 
-    dailyobj['ml'] = ml;
+    dailyobj['ml'] = Math.round(ml);
         
     dailyMap.set(date, dailyobj);
   

@@ -2,18 +2,22 @@ import Image from "next/image";
 import { fetchWeather, DetailType } from '@/app/lib/data';
 import { Suspense } from "react";
 import Menu from "./ui/menu";
-import { getLanguage, getPlacesFromCookie, Language, PlaceData } from "./lib/cookies";
+import { getLanguage, getPlacesFromCookie, getShowCurrentPlace, Language, PlaceData } from "./lib/cookies";
 import {Currentrow} from "./ui/currentrow";
 import  WeatherSkelton  from "./ui/skelton";
 import Row from '@/app/ui/row';
+import Showcurrent from "./ui/showcurrent";
 
-const translations:   { [language: string]: { [key: string]: string } } = 
+const translations:   { [language: string]: { [key: string]: string | string[] } } = 
 {
-  english: {
+  en: {
     days: 'Days',
+    week: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     weather: 'Weather',
     temp: 'Temp',
     pop: 'POP',
+    _: 'No precipitation',
+    hours: 'Hours',
     humidity: 'Humidity',
     wind: 'Wind',
     menu: 'menu',
@@ -21,11 +25,14 @@ const translations:   { [language: string]: { [key: string]: string } } =
     language: 'Language',
     aboutUs: 'About us',
   },
-  japanese: {
+  ja: {
     days: '日',
+    week: ['日', '月', '火', '水', '木', '金', '土'],
     weather: '天気',
     temp: '気温',
     pop: '降水確率',
+    _: '降水無し',
+    hours: 'Hours',
     humidity: '湿度',
     wind: '風',
     menu: 'メニュー',
@@ -33,11 +40,14 @@ const translations:   { [language: string]: { [key: string]: string } } =
     language: '言語',
     aboutUs: '私たちについて',
   },
-  chinese: {
+  zh_cn: {
     days: '日期',
+    week: ['日', '一', '二', '三', '四', '五', '六'],
     weather: '天气',
     temp: '温度',
     pop: '降水概率',
+    _: '无降水',
+    hours: '时间',
     humidity: '湿度',
     wind: '风',
     menu: '菜单',
@@ -45,11 +55,14 @@ const translations:   { [language: string]: { [key: string]: string } } =
     language: '语言',
     aboutUs: '关于我们',
   },
-  russian: {
+  ru: {
     days: 'Дни',
+    week: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     weather: 'Погода',
     temp: 'Темп',
     pop: 'Осадки',
+    _: 'Без осадков',
+    hours: 'Время',
     humidity: 'Влажность',
     wind: 'Ветер',
     menu: 'меню',
@@ -57,23 +70,29 @@ const translations:   { [language: string]: { [key: string]: string } } =
     language: 'Язык',
     aboutUs: 'О нас',
   },
-  spanish: {
+  es: {
     days: 'Días',
+    week: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
     weather: 'Clima',
     temp: 'Temp',
     pop: 'Precipitación',
+    _: 'Sin precipitaciones',
     humidity: 'Humedad',
+    hours: 'Hora',
     wind: 'Viento',
     menu: 'menú',
     selectPlace: 'Seleccionar lugar',
     language: 'Idioma',
     aboutUs: 'Acerca de nosotros',
   },
-  french: {
+  fr: {
     days: 'Jours',
+    week: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
     weather: 'Météo',
     temp: 'Temp',
     pop: 'Précipitations',
+    _: 'Aucune précipitation',
+    hours: 'Heure',
     humidity: 'Humidité',
     wind: 'Vent',
     menu: 'menu',
@@ -81,11 +100,14 @@ const translations:   { [language: string]: { [key: string]: string } } =
     language: 'Langue',
     aboutUs: 'À propos de nous',
   },
-  arabic: {
+  ar: {
     days: 'الأيام',
+    week: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
     weather: 'الطقس',
     temp: 'الحرارة',
     pop: 'الأمطار',
+    _: 'لا هطول للأمطار',
+    hours: 'الوقت',
     humidity: 'الرطوبة',
     wind: 'الرياح',
     menu: 'القائمة',
@@ -95,41 +117,43 @@ const translations:   { [language: string]: { [key: string]: string } } =
   }
 };
 
-type LangProp =  [language: Language, {[key: string]: string; }]; 
+export type LangProp =  [language: Language, {[key: string]: string |string[]; }]; 
 
-async function RowData({ name, lat, lon, lang, url="" }: { name: string; lat: string; lon: string; lang: LangProp;  url: string}) {
+async function RowData({ name, lat, lng, lang, url="" }: { name: string; lat: string; lng: string; lang: LangProp;  url: string}) {
    
-  const data: Map<string, DetailType[]> =  await fetchWeather(lat, lon, lang[0] , url);
-        
+  const data: {name:string,details:Map<string, DetailType[]>} =  await fetchWeather(lat, lng, lang[0] , url);
+    const cityname = name.startsWith("default") ? data.name : name ; 
   return (
     <div>
-      <Row name={name} weather={data} lang={lang[1]}  />
+      <Row weather={data.details} lang={lang[1]}  name={cityname} />
     </div>
   );
 }
 
 export default async function Home() {
   const cookies:PlaceData[] = await getPlacesFromCookie();
-  console.log('Cookie data:', cookies); // Debug log
+  const showcurrent:boolean = await getShowCurrentPlace(); 
+  console.log('Cookie data:', showcurrent); // Debug log
  // const showcurrent = true; //  await getShowCurrentPlace()
-  const places: {name: string, lat: string, lon: string, url: string}[] = 
-    cookies.length > 0 ? cookies.map(cookie => ({'name': cookie.name, 'lat': cookie.lat, 'lon': cookie.lon, 'url': ""})) : [];
+  const places: {name: string, lat: string, lng: string, url: string}[] = 
+    cookies.length > 0 ? cookies.map(cookie => ({'name': cookie.name, 'lat': cookie.lat, 'lng': cookie.lng, 'url': ""})) : [];
   console.log('Places array:', places); // Debug log  
   const language:Language =  await getLanguage();
   const lang:LangProp  = [language, translations[language]];
   return (
     <>
      <div className="menu  absolute right-[5%] top-1">
-       <Menu />
+       <Menu lang={lang} showcurrent={showcurrent} />
      </div>
-     <div className="mt-[49px] ">
+     <div className="mt-[49px] "> 
+      { showcurrent &&
       <Suspense key="current" fallback={<WeatherSkelton/>}>
-        <Currentrow  lang={language}/>
+        <Currentrow  lang={lang} />
       </Suspense>
-         
+      }
          {places &&  places.map((place, index) => 
          <Suspense key={index} fallback={<WeatherSkelton/> }>
-           <RowData name={place.name} lat={place.lat} lon={place.lon} lang={lang} url={place.url}  />
+           <RowData name={place.name} lat={place.lat} lng={place.lng} lang={lang} url={place.url}  />
          </Suspense>
          )}
   </div>

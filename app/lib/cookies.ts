@@ -6,11 +6,12 @@ import { revalidatePath } from 'next/cache';
 export interface PlaceData {
   name: string;
   lat: string;
-  lon: string;
+  lng: string;
 }
 
 export async function savePlacesToCookie(places: PlaceData[] | null): Promise<void> {
-  await cookies().set('places', JSON.stringify(places), {
+  const cookiestore = await cookies();
+  cookiestore.set('places', JSON.stringify(places), {
     path: '/',
     maxAge: 31536000
   });
@@ -28,10 +29,11 @@ export async function getPlacesFromCookie(): Promise<PlaceData[]> {
   return [];
 }
 
-export type Language = 'english' | 'japanese' | 'chinese' | 'russian' | 'spanish' | 'french' | 'arabic';
+export type Language = 'en' | 'ja' | 'zh_cn' | 'ru' | 'es' | 'fr' | 'ar';
 
 export async function saveLanguage(language: Language) {
-  await cookies().set('language', JSON.stringify(language), {
+  const cookiestore = await cookies();
+  cookiestore.set('language', JSON.stringify(language), {
     path: '/',
     maxAge: 31536000
 }); 
@@ -44,23 +46,24 @@ export async function getLanguage(): Promise<Language> {
     try {
       return JSON.parse(language.value);
     } catch {
-      console.error("Error parsing places cookie");
+      console.error("Error parsing language from cookie");
     }
-  }  return  'english';
-  
+  }  return  'en';
 }
-/*export async  function  getShowCurrentPlace() {
+export async function  saveShowCurrrentPlace(showcurrent: boolean) {
+  const cookiestore = await cookies();
+  cookiestore.set('showcurrent', JSON.stringify(showcurrent), {
+    path: '/',
+    maxAge: 31536000
+  });
+  revalidatePath('/');
+}
+
+
+export async  function  getShowCurrentPlace() {
   const currentplace = await cookies().get('showcurrent');
-   if (currentplace)  {return true;} else {
+   if (currentplace)  {return JSON.parse(currentplace.value);} else {
     return false;
    } 
 }
 
-export async function  saveShowCurrrentPlace(showcurrent: boolean) {
-  await  cookies().set('showcurrent', JSON.stringify('showcurrent'), {
-    path: '/',
-    maxAge: 31536000
-  });
-}
-
-*/
