@@ -2,6 +2,7 @@
 import { preload } from 'react-dom';
 import { useState, useRef, useEffect } from 'react';
 import { PlaceData } from '../lib/cookies';
+import { LangProp } from '../page';
 
 
 export interface LeafletSaveProps {
@@ -51,7 +52,8 @@ async function getPlaceName({lat, lng, lang}:{ lat:number, lng:number, lang: str
 
 
 
-export default function LeafletPlaceSelector({ onsave, currentPlaces, lang }: { onsave: (placedata: PlaceData) => void;  currentPlaces : PlaceData[] | []; lang: [string, {[key: string]: string}] }) {
+export default function LeafletPlaceSelector({ onsave, currentPlaces, lang }: { onsave: (placedata: PlaceData) => void;  currentPlaces : PlaceData[] | []; lang: LangProp }) {
+  
   const [placename, setPlaceName] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }|null>(null) ;
   const mapRef = useRef<HTMLDivElement>(null);
