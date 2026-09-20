@@ -6,7 +6,6 @@ import { getLanguage, getPlacesFromCookie, getShowCurrentPlace, Language, PlaceD
 import {Currentrow} from "./ui/currentrow";
 import  WeatherSkelton  from "./ui/skelton";
 import Row from '@/app/ui/row';
-import Showcurrent from "./ui/showcurrent";
 
 const translations:   { [language: string]: { [key: string]: string | string[] } } = 
 {

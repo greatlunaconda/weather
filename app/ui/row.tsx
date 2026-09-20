@@ -3,9 +3,7 @@
 import { Children, useState, useRef, MouseEvent } from 'react';
 import { getDaily, DetailType, DailyType } from '../lib/data';
 
-import { Language } from '../lib/cookies';
 
-//const {language, t} = useLanguage();
 
 interface WeatherData {
   date: string;

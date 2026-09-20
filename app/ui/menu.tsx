@@ -5,7 +5,6 @@ import { useState, startTransition } from "react";
 import { saveLanguage , Language, saveShowCurrrentPlace} from "../lib/cookies";
 import { LangProp } from "../page";
 
-//import { useLanguage } from "../contexts/language-context";
 
 export default function Menu({lang, showcurrent}:{ lang: LangProp, showcurrent:boolean }) {
   const [menu, setMenu] = useState(false);
